@@ -78,6 +78,33 @@ public class Server {
 			players.remove(idx);
 		}
 	}
+	
+	public static void addThread(ServerThread thread) {
+		synchronized (threads) {
+			threads.add(thread);
+		}	
+	}
+	
+	public static void eraseThread(ServerThread thread) {
+		synchronized (threads) {
+			threads.remove(thread);
+		}
+	}
+	
+	public static void debug() {
+		System.out.println("(Threads)");
+		for (ServerThread thread : threads) {
+			System.out.println(thread.toString());
+		}
+		System.out.println("(Players)");
+		for (Player player : players) {
+			System.out.println(player.toString());
+		}
+		System.out.println("(Rooms)");
+		for (Room room : rooms) {
+			System.out.println(room.toString());
+		}
+	}
 
 	public static void main(String[] args) {
 		serverSocket = null;
@@ -91,14 +118,11 @@ public class Server {
 
 			while (true) {
 				Socket socket = serverSocket.accept();
-				System.out.println("Woosung");
+				System.out.println("New connection created");
 
 				ServerThread thread = new ServerThread(socket);
 				thread.start();
-
-				synchronized (threads) {
-					threads.add(thread);
-				}
+				addThread(thread);
 			}
 		} catch (IOException ioex) {
 			ioex.printStackTrace();

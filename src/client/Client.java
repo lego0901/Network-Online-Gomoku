@@ -16,10 +16,11 @@ public class Client {
 	
 	static BufferedReader reader;
 	static PrintWriter writer;
-
+	static Scanner keyboard;
+	
 	public static void main(String[] args) {
 		Socket socket = null;
-		Scanner keyboard = new Scanner(System.in);
+		keyboard = new Scanner(System.in);
 
 		try {
 			socket = new Socket();
@@ -48,6 +49,15 @@ public class Client {
 		} catch (IOException ioex) {
 			ioex.printStackTrace();
 		} catch (InterruptedException iex) {
+			try {
+				writer.println("close");
+				writer.flush();
+				if (socket != null && !socket.isClosed()) {
+					socket.close();
+				}
+			} catch (IOException ioex) {
+				ioex.printStackTrace();
+			}
 			iex.printStackTrace();
 		} finally {
 			try {

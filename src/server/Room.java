@@ -33,6 +33,8 @@ public class Room {
 	}
 
 	public void addPlayer(Player player) {
+		if (players.size() >= 2)
+			return;
 		for (int i = 0; i < players.size(); i++) {
 			if (players.get(i) == player) {
 				return;
@@ -73,6 +75,20 @@ public class Room {
 			players.get(turn - 1).turnID = turn;
 		}
 	}
+	
+	public void initializeGame() {
+		setTurnsOfPlayers();
+		game.initialize();
+		state = RoomState.PLAYING;
+		
+		for (Player player : players) {
+			if (player.turnID == game.turn) {
+				player.state = PlayerState.MY_TURN;
+			} else {
+				player.state = PlayerState.NOT_MY_TURN;
+			}
+		}
+	}
 
 	public void setWinner(String playerID) {
 		for (Player player : players) {
@@ -90,5 +106,19 @@ public class Room {
 				game.state = 1;
 			}
 		}
+	}
+	
+	@Override
+	public String toString() {
+		String str = "<" + id;
+		if (players.size() > 0) {
+			str += ", players:";
+			for (Player player : players) {
+				str += " " + player.id;
+			}
+		}
+		str += ", " + state;
+		str += ">";
+		return str;
 	}
 }

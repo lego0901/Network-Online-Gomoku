@@ -7,70 +7,99 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
+import java.time.LocalDateTime;
 
 public class ServerThread extends Thread {
-	
+	public static final int QUERY_TIMEOUT_SECONDS = 70;
+
 	Socket socket = null;
 	Player player = null;
-	
+
 	BufferedReader reader;
 	PrintWriter writer;
-	
-	// TODO: implement timeout for idleness; socket disconnection
+
+	LocalDateTime lastQueryTime;
 
 	public ServerThread(Socket socket) {
 		this.socket = socket;
+		lastQueryTime = LocalDateTime.now();
 	}
-	
+
 	void write(String str) {
 		writer.println(str);
 		writer.flush();
 	}
-	
+
 	void debug(String str) {
 		if (Server.printLog)
 			System.out.println(str);
 	}
 	
+	void setTimer() {
+		lastQueryTime = LocalDateTime.now();
+	}
+
 	boolean isThreadTimeout() {
-		// TODO: implement this
+		if (Duration.between(lastQueryTime, LocalDateTime.now()).getSeconds() >= QUERY_TIMEOUT_SECONDS)
+			return true;
 		return false;
+	}
+	
+	@Override
+	public String toString() {
+		String str = "<" + socket.getInetAddress().toString();
+		if (player != null) {
+			str += ", player: " + player.id;
+		}
+		str += ", last query time: " + lastQueryTime.toString();
+		str += ">";
+		return str;
 	}
 
 	public void run() {
 		try {
-			reader = new BufferedReader(
-					new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_8));
-			writer = new PrintWriter(
-					new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_8));
+			reader = new BufferedReader(new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_8));
+			writer = new PrintWriter(new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_8));
 
 			boolean closeConnection = false;
 
 			while (player == null && !closeConnection) {
-				String query = reader.readLine().strip();
+				if (reader.ready()) {
+					String query = reader.readLine().strip();
+					setTimer();
+					Server.debug();
 
-				if (query.equals("close")) {
-					closeConnection = true;
-					break;
-				} else if (query.equals("playerID")) {
-					String playerID = reader.readLine();
-					if (Server.addPlayer(playerID, this)) {
-						player = Server.fetchPlayer(playerID);
-						debug("Player " + playerID + " successfully created!");
-						write("success");
+					if (query.equals("close")) {
+						closeConnection = true;
+						break;
+					} else if (query.equals("player")) {
+						String playerID = reader.readLine();
+						if (Server.addPlayer(playerID, this)) {
+							player = Server.fetchPlayer(playerID);
+							debug("Player " + playerID + " successfully created!");
+							write("success");
+						} else {
+							debug("Player " + playerID + " is duplicated");
+							write("fail");
+						}
 					} else {
-						debug("Player " + playerID + " is duplicated");
-						write("fail");
+						debug("Invalid query received");
+						write("invalid");
 					}
-				} else {
-					debug("Invalid query received");
-					write("invalid");
+				} else if (isThreadTimeout()) {
+					debug("Client query timeout");
+					write("query timeout");
+					closeConnection = true;
 				}
+				sleep(10);
 			}
 
 			while (!closeConnection) {
 				if (reader.ready()) {
 					String query = reader.readLine().strip();
+					setTimer();
+					Server.debug();
 
 					if (query.equals("close")) {
 						closeConnection = true;
@@ -144,22 +173,36 @@ public class ServerThread extends Thread {
 							// TODO: implement this
 						}
 					case NOT_MY_TURN:
+						debug("Query from NOT_MY_TURN is ignored");
+						write("ignored");
 						// ignore all signals
 					}
+				} else if (isThreadTimeout()) {
+					closeConnection = true;
+					debug("Client query timeout");
+					write("query timeout");
 				} else {
 					switch (player.state) {
 					case READY_ROOM:
 						if (player.isMyRoomReady()) {
-							// TODO: implement this
+							player.room.initalize();
+							if (player.isMyTurn()) {
+								player.setTimer();
+							}
 						}
+						break;
 					case MY_TURN:
-						if (player.isTimeOut()) {
+						if (player.isTimeout()) {
+							// TODO: implement this
+						} else if (player.isMyGameTerminated()) {
 							// TODO: implement this
 						}
+						break;
 					case NOT_MY_TURN:
 						if (player.isMyGameTerminated()) {
 							// TODO: implement this
 						}
+						break;
 					default:
 						break;
 					}
@@ -168,7 +211,6 @@ public class ServerThread extends Thread {
 			}
 
 			write("bye");
-			System.out.println(reader.readLine());
 		} catch (IOException ioe) {
 			ioe.printStackTrace();
 		} catch (InterruptedException ie) {
@@ -176,12 +218,14 @@ public class ServerThread extends Thread {
 		} finally {
 			debug("try to close");
 			if (player != null) {
+				Server.erasePlayer(player.id);
 				if (player.room != null) {
 					player.leaveRoom();
 				}
-				Server.erasePlayer(player.id);
 			}
 			
+			Server.eraseThread(this);
+
 			try {
 				if (socket != null && !socket.isClosed()) {
 					socket.close();

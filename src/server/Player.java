@@ -1,5 +1,6 @@
 package server;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 
 import server.Room.RoomState;
@@ -7,6 +8,7 @@ import server.Room.RoomState;
 public class Player {
 	public static final int MIN_ID_LENGTH = 2;
 	public static final int MAX_ID_LENGTH = 20;
+	public static final int MOVE_TIMEOUT_SECONDS = 60;
 
 	public static enum PlayerState {
 		SEARCH_ROOM, ENTER_ROOM, READY_ROOM, MY_TURN, NOT_MY_TURN,
@@ -16,8 +18,8 @@ public class Player {
 	public PlayerState state;
 	public ServerThread thread;
 	public Room room;
-	
-	public int turnID; 
+
+	public int turnID;
 	public LocalDateTime lastMoveTime;
 
 	public Player(String id, ServerThread thread) {
@@ -33,7 +35,7 @@ public class Player {
 	public void initalize() {
 		state = PlayerState.SEARCH_ROOM;
 	}
-	
+
 	// before playing game
 	public boolean enterRoom(String roomID) {
 		room = Server.fetchRoom(roomID);
@@ -44,7 +46,7 @@ public class Player {
 		}
 		return false;
 	}
-	
+
 	public void leaveRoom() {
 		if (room != null) {
 			room.removePlayer(this);
@@ -65,7 +67,7 @@ public class Player {
 		if (state == PlayerState.READY_ROOM)
 			state = PlayerState.ENTER_ROOM;
 	}
-	
+
 	public boolean isMyRoomReady() {
 		return room != null && room.isReady();
 	}
@@ -75,18 +77,33 @@ public class Player {
 		if (room == null || room.state != RoomState.PLAYING)
 			return false;
 		else {
-			assert(room.game != null);
+			assert (room.game != null);
 			return this == room.players.get(room.game.turn - 1);
 		}
 	}
 	
-	public boolean isTimeOut() {
-		// TODO: implement this
+	public void setTimer() {
+		lastMoveTime = LocalDateTime.now();
+	}
+
+	public boolean isTimeout() {
+		if (Duration.between(lastMoveTime, LocalDateTime.now()).getSeconds() >= MOVE_TIMEOUT_SECONDS)
+			return true;
 		return false;
 	}
-	
+
 	public boolean isMyGameTerminated() {
-		// TODO: implement this
-		return false;
+		return room.game.state == 1;
+	}
+	
+	@Override
+	public String toString() {
+		String str = "<" + id;
+		if (room != null) {
+			str += ", in " + room.id;
+		}
+		str += ", " + state;
+		str += ">";
+		return str;
 	}
 }
