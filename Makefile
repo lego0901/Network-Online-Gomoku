@@ -3,7 +3,6 @@ JAVA_RUN=java
 #JAVA_VERSION=$(shell java -version | grep :
 
 JAVA_SRC=$(wildcard src/*.java src/*/*.java)
-JAVA_BIN=$(JAVA_SRC:src/%.java=bin/%.class)
 
 MANIFEST=manifest.mf
 
@@ -17,10 +16,8 @@ help:
 	@echo make client: make an executable client.jar file
 	@echo make all: compile and make executable server.jar and client.jar
 
-compile: $(JAVA_BIN)
-
-bin/%.class: src/%.java
-	$(JAVA_COMPILE) -d ./bin $<
+compile:
+	$(JAVA_COMPILE) -d ./bin $(JAVA_SRC)
 
 server: compile
 	@echo "Manifest-Version: 1.0" > $(MANIFEST)
