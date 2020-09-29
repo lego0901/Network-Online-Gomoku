@@ -1,64 +1,104 @@
 package server;
 
 import java.net.Socket;
-import java.nio.charset.StandardCharsets;
-
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
-import java.io.BufferedReader;
+import java.util.LinkedList;
 import java.io.IOException;
-import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 
-class GomokuServerThread extends Thread {
-	Socket socket = null;
-	
-	public GomokuServerThread(Socket socket) {
-		this.socket = socket;
-	}
-	
-	public void run() {
-		try {
-			BufferedReader reader = new BufferedReader(
-					new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_8));
-			PrintWriter writer = new PrintWriter(
-					new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_8));
+public class Server {
+	public final static int SERVER_PORT = 20523;
+	public static boolean printLog = true;
 
-			writer.println("Hello Client");
-			writer.flush();
-			System.out.println(reader.readLine());
-		} catch (IOException ioex) {
-			ioex.printStackTrace();
-		} finally {
-			try {
-				if (socket != null && !socket.isClosed()) {
-					socket.close();
-				}
-			} catch (IOException ioex) {
-				ioex.printStackTrace();
+	public static ServerSocket serverSocket;
+
+	public static LinkedList<ServerThread> threads;
+	public static LinkedList<Player> players;
+	public static LinkedList<Room> rooms;
+
+	public static boolean addRoom(String roomID) {
+		synchronized (rooms) {
+			for (Room room : rooms) {
+				if (room.id.equals(roomID))
+					return false;
 			}
+			rooms.add(new Room(roomID));
+			return true;
 		}
 	}
-}
 
-public class Server {
-	//public final static String SERVER_HOST = "localhost"; // "147.46.209.30";
-	public final static int SERVER_PORT = 20523;
+	public static boolean addPlayer(String playerID, ServerThread thread) {
+		synchronized (players) {
+			for (Player player : players) {
+				if (player.id.equals(playerID))
+					return false;
+			}
+			players.add(new Player(playerID, thread));
+			return true;
+		}
+	}
+
+	public static Room fetchRoom(String roomID) {
+		for (Room room : rooms) {
+			if (room.id.equals(roomID))
+				return room;
+		}
+		return null;
+	}
+
+	public static Player fetchPlayer(String playerID) {
+		for (Player player : players) {
+			if (player.id.equals(playerID))
+				return player;
+		}
+		return null;
+	}
+
+	public static void eraseRoom(String roomID) {
+		synchronized (rooms) {
+			int idx = -1;
+			for (int i = 0; i < rooms.size(); i++) {
+				if (rooms.get(i).id.equals(roomID)) {
+					idx = i;
+					break;
+				}
+			}
+			rooms.remove(idx);
+		}
+	}
+
+	public static void erasePlayer(String playerID) {
+		synchronized (players) {
+			int idx = -1;
+			for (int i = 0; i < players.size(); i++) {
+				if (players.get(i).id.equals(playerID)) {
+					idx = i;
+					break;
+				}
+			}
+			players.remove(idx);
+		}
+	}
 
 	public static void main(String[] args) {
-		Socket socket = null;
-		ServerSocket serverSocket = null;
+		serverSocket = null;
+		threads = new LinkedList<ServerThread>();
+		players = new LinkedList<Player>();
+		rooms = new LinkedList<Room>();
 
 		try {
 			serverSocket = new ServerSocket(SERVER_PORT);
-			//serverSocket.bind(new InetSocketAddress(SERVER_HOST, SERVER_PORT));
 			System.out.println("Bind complete");
-			
+
 			while (true) {
-				socket = serverSocket.accept();
+				Socket socket = serverSocket.accept();
 				System.out.println("Woosung");
-				new GomokuServerThread(socket).start();
+
+				ServerThread thread = new ServerThread(socket);
+				thread.start();
+
+				synchronized (threads) {
+					threads.add(thread);
+				}
 			}
 		} catch (IOException ioex) {
 			ioex.printStackTrace();

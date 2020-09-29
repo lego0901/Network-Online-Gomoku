@@ -2,40 +2,57 @@ package client;
 
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
-
+import java.util.Scanner;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
 
 public class Client {
 	final static String SERVER_HOST = "147.46.209.30";
 	final static int SERVER_PORT = 20523;
+	
+	static BufferedReader reader;
+	static PrintWriter writer;
 
 	public static void main(String[] args) {
 		Socket socket = null;
+		Scanner keyboard = new Scanner(System.in);
 
 		try {
-			socket = new Socket(SERVER_HOST, SERVER_PORT);
-			//socket.connect();
-			//socket.connect(InetAddress.getByAddress(SERVER_HOST), SERVER_PORT);
+			socket = new Socket();
+			socket.connect(new InetSocketAddress(SERVER_HOST, SERVER_PORT));
 			System.out.println("Connected successfully!");
 
-			BufferedReader reader = new BufferedReader(
+			reader = new BufferedReader(
 					new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_8));
-			PrintWriter writer = new PrintWriter(
+			writer = new PrintWriter(
 					new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_8));
 
-			writer.println("Hello Server");
-			writer.flush();
-			System.out.println(reader.readLine());
+			while (true) {
+				if (keyboard.hasNextLine()) {
+					String query = keyboard.nextLine();
+					if (query.equals("close"))
+						break;
+					
+					writer.println(query);
+					writer.flush();
+				}
+				if (reader.ready()) {
+					System.out.println(reader.readLine());
+				}
+				Thread.sleep(10);
+			}
 		} catch (IOException ioex) {
 			ioex.printStackTrace();
+		} catch (InterruptedException iex) {
+			iex.printStackTrace();
 		} finally {
 			try {
+				writer.println("close");
+				writer.flush();
 				if (socket != null && !socket.isClosed()) {
 					socket.close();
 				}
