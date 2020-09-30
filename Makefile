@@ -3,12 +3,11 @@ JAVA_RUN=java
 #JAVA_VERSION=$(shell java -version | grep :
 
 JAVA_SRC=$(wildcard src/*.java src/*/*.java)
-JAVA_BIN=$(JAVA_SRC:src/%.java=bin/%.class)
 
 MANIFEST=manifest.mf
 
 
-all: compile server client
+all: compile server client proxy
 
 help:
 	@echo make help: print this message
@@ -17,10 +16,8 @@ help:
 	@echo make client: make an executable client.jar file
 	@echo make all: compile and make executable server.jar and client.jar
 
-compile: $(JAVA_BIN)
-
-bin/%.class: src/%.java
-	$(JAVA_COMPILE) -d ./bin $<
+compile:
+	$(JAVA_COMPILE) -d ./bin $(JAVA_SRC)
 
 server: compile
 	@echo "Manifest-Version: 1.0" > $(MANIFEST)
@@ -30,13 +27,25 @@ server: compile
 	@rm $(MANIFEST)
 
 client: compile
-	@echo "Manifest-Version: 1.0" > $(MANIFEST)
-	@echo "Main-Class: client.Client" >> $(MANIFEST)
+	@echo "manifest-version: 1.0" > $(MANIFEST)
+	@echo "main-class: client.Client" >> $(MANIFEST)
 	@echo "" >> $(MANIFEST)
 	jar cfm client.jar $(MANIFEST) -C bin/ .
 	@rm $(MANIFEST)
 
+proxy: compile
+	@echo "manifest-version: 1.0" > $(MANIFEST)
+	@echo "main-class: client.ProxyClientReader" >> $(MANIFEST)
+	@echo "" >> $(MANIFEST)
+	jar cfm proxy-reader.jar $(MANIFEST) -C bin/ .
+	@rm $(MANIFEST)
+	@echo "manifest-version: 1.0" > $(MANIFEST)
+	@echo "main-class: client.ProxyClientWriter" >> $(MANIFEST)
+	@echo "" >> $(MANIFEST)
+	jar cfm proxy-writer.jar $(MANIFEST) -C bin/ .
+	@rm $(MANIFEST)
+
 clean:
 	rm -rf bin
-	rm server.jar client.jar
+	rm server.jar client.jar proxy-reader.jar proxy-writer.jar
 
