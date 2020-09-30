@@ -175,7 +175,25 @@ public class ServerThread extends Thread {
 							}
 							Server.debug();
 						} else if (query.equals("search")) {
-							// TODO: implement this
+							write("success");
+							write("search result");
+							write("" + Server.rooms.size());
+							
+							// print waiting room first
+							for (Room room : Server.rooms) {
+								if (!room.isFull()) {
+									write("wait");
+									write(room.id);
+								}
+							}
+							
+							// print full room after
+							for (Room room : Server.rooms) {
+								if (room.isFull()) {
+									write("full");
+									write(room.id);
+								}
+							}
 						} else {
 							debug("Invalid query received");
 							write("invalid");
