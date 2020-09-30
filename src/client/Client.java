@@ -43,6 +43,7 @@ public class Client {
 				}
 				if (reader.ready()) {
 					System.out.println(reader.readLine());
+					System.out.flush();
 				}
 				Thread.sleep(10);
 			}

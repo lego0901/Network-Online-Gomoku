@@ -92,17 +92,18 @@ public class Server {
 	}
 	
 	public static void debug() {
+		System.out.println();
 		System.out.println("(Threads)");
 		for (ServerThread thread : threads) {
-			System.out.println(thread.toString());
+			System.out.println(thread);
 		}
 		System.out.println("(Players)");
 		for (Player player : players) {
-			System.out.println(player.toString());
+			System.out.println(player);
 		}
 		System.out.println("(Rooms)");
 		for (Room room : rooms) {
-			System.out.println(room.toString());
+			System.out.println(room);
 		}
 	}
 

@@ -3,6 +3,7 @@ package server;
 import java.time.Duration;
 import java.time.LocalDateTime;
 
+import gomoku.Gomoku;
 import server.Room.RoomState;
 
 public class Player {
@@ -49,6 +50,9 @@ public class Player {
 
 	public void leaveRoom() {
 		if (room != null) {
+			if (room.state == RoomState.PLAYING) {
+				setLoser();
+			}
 			room.removePlayer(this);
 			if (room.isDestructable()) {
 				Server.eraseRoom(room.id);
@@ -68,8 +72,24 @@ public class Player {
 			state = PlayerState.ENTER_ROOM;
 	}
 
+	public boolean isPlayingOrReady() {
+		return state == PlayerState.READY_ROOM || state == PlayerState.MY_TURN || state == PlayerState.NOT_MY_TURN;
+	}
+
 	public boolean isMyRoomReady() {
 		return room != null && room.isReady();
+	}
+
+	public void initializeGame() {
+		room.setTurnsOfPlayers();
+		if (turnID == 1) {
+			// first player initialize the game
+			room.initializeGame();
+			state = PlayerState.MY_TURN;
+			setTimer();
+		} else {
+			state = PlayerState.NOT_MY_TURN;
+		}
 	}
 
 	// while playing game
@@ -78,10 +98,28 @@ public class Player {
 			return false;
 		else {
 			assert (room.game != null);
-			return this == room.players.get(room.game.turn - 1);
+			return turnID == room.game.turn;
 		}
 	}
-	
+
+	public boolean putStone(int row, int column) {
+		if (!isMyTurn())
+			return false;
+		return room.putStone(row, column);
+	}
+
+	public String putStoneErrorMsg() {
+		return room.game.putStoneErrorMsg;
+	}
+
+	public void setWinner() {
+		room.setWinner(id);
+	}
+
+	public void setLoser() {
+		room.setLoser(id);
+	}
+
 	public void setTimer() {
 		lastMoveTime = LocalDateTime.now();
 	}
@@ -93,9 +131,28 @@ public class Player {
 	}
 
 	public boolean isMyGameTerminated() {
-		return room.game.state == 1;
+		return room.game != null && room.game.terminated;
 	}
-	
+
+	public boolean isWinner() {
+		return room.game != null && room.game.winner == turnID;
+	}
+
+	public boolean isLoser() {
+		return room.game != null && room.game.winner == Gomoku.nextTurn(turnID);
+	}
+
+	public boolean isDraw() {
+		return room.game != null && room.game.winner == -1;
+	}
+
+	public void endGame() {
+		state = PlayerState.ENTER_ROOM;
+		if (turnID == 1) {
+			room.endGame();
+		}
+	}
+
 	@Override
 	public String toString() {
 		String str = "<" + id;

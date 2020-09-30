@@ -3,7 +3,6 @@ package server;
 import java.util.LinkedList;
 
 import gomoku.Gomoku;
-import server.Player.PlayerState;
 
 public class Room {
 	public static final int MIN_ID_LENGTH = 2;
@@ -65,49 +64,53 @@ public class Room {
 	}
 
 	public boolean isReady() {
-		return players.size() == 2 && players.get(0).state == PlayerState.READY_ROOM
-				&& players.get(1).state == PlayerState.READY_ROOM;
+		return players.size() == 2 && players.get(0).isPlayingOrReady() && players.get(1).isPlayingOrReady();
 	}
 
 	public void setTurnsOfPlayers() {
 		assert (players.size() == 2);
-		for (int turn = 1; turn <= 2; turn++) {
-			players.get(turn - 1).turnID = turn;
-		}
-	}
-	
-	public void initializeGame() {
-		setTurnsOfPlayers();
-		game.initialize();
-		state = RoomState.PLAYING;
-		
-		for (Player player : players) {
-			if (player.turnID == game.turn) {
-				player.state = PlayerState.MY_TURN;
-			} else {
-				player.state = PlayerState.NOT_MY_TURN;
+		synchronized (players) {
+			for (int turn = 1; turn <= 2; turn++) {
+				players.get(turn - 1).turnID = turn;
+				System.out.println("Player " + players.get(turn - 1).id + "'s turn is " + turn);
 			}
 		}
 	}
 
+	public void initializeGame() {
+		game = new Gomoku(11, 11, 50);
+		game.initialize();
+		state = RoomState.PLAYING;
+	}
+
+	public boolean putStone(int row, int column) {
+		return game.putStone(row, column);
+	}
+
 	public void setWinner(String playerID) {
+		endGame();
 		for (Player player : players) {
 			if (player.id.equals(playerID)) {
 				game.winner = player.turnID;
-				game.state = 1;
+				game.terminated = true;
 			}
 		}
 	}
 
 	public void setLoser(String playerID) {
+		endGame();
 		for (Player player : players) {
 			if (player.id.equals(playerID)) {
 				game.winner = Gomoku.nextTurn(player.turnID);
-				game.state = 1;
+				game.terminated = true;
 			}
 		}
 	}
-	
+
+	public void endGame() {
+		state = RoomState.FULL_ROOM;
+	}
+
 	@Override
 	public String toString() {
 		String str = "<" + id;

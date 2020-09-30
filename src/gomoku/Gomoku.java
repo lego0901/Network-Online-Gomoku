@@ -1,5 +1,7 @@
 package gomoku;
 
+import java.util.Scanner;
+
 public class Gomoku {
 	public int rows;
 	public int columns;
@@ -8,7 +10,7 @@ public class Gomoku {
 	public int numStones;
 	public int maxStones;
 	public int winner;
-	public int state;
+	public boolean terminated;
 	public int outOfRangeCount[];
 	public String putStoneErrorMsg;
 
@@ -27,7 +29,7 @@ public class Gomoku {
 		turn = 1;
 		numStones = 0;
 		winner = 0;
-		state = 0;
+		terminated = false;
 		outOfRangeCount = new int[2];
 		board = new int[rows][columns];
 	}
@@ -40,7 +42,7 @@ public class Gomoku {
 
 			if (outOfRangeCount[turn - 1] > 1) {
 				winner = nextTurn(turn);
-				state = 1;
+				terminated = true;
 				return true;
 			} else {
 				return false;
@@ -53,10 +55,10 @@ public class Gomoku {
 
 			if (isConsecutiveFive(row, column)) {
 				winner = turn;
-				state = 1;
+				terminated = true;
 			} else if (numStones == maxStones) {
 				winner = -1;
-				state = 1;
+				terminated = true;
 			} else {
 				turn = nextTurn(turn);
 			}
@@ -103,7 +105,7 @@ public class Gomoku {
 
 			r = row - dr;
 			c = column - dc;
-			while (!isOutOfRange(row, column) && board[r][c] == turn) {
+			while (!isOutOfRange(r, c) && board[r][c] == turn) {
 				left++;
 				r -= dr;
 				c -= dc;
@@ -111,7 +113,7 @@ public class Gomoku {
 
 			r = row + dr;
 			c = column + dc;
-			while (!isOutOfRange(row, column) && board[r][c] == turn) {
+			while (!isOutOfRange(r, c) && board[r][c] == turn) {
 				right++;
 				r += dr;
 				c += dc;
@@ -123,7 +125,8 @@ public class Gomoku {
 		return false;
 	}
 
-	public String getCUI() {
+	@Override
+	public String toString() {
 		String id1 = "O", id2 = "X";
 		String boardString = "Turn: " + idOfTurn(turn, id1, id2) + ", Winner: " + idOfTurn(winner, id1, id2)
 				+ "\n======================================\n  ";
@@ -152,5 +155,23 @@ public class Gomoku {
 		}
 
 		return boardString;
+	}
+	
+	private static Scanner keyboard;
+	
+	public static void main(String[] args) {
+		keyboard = new Scanner(System.in);
+		Gomoku game = new Gomoku(11, 11, 50);
+		
+		while (!game.terminated) {
+			System.out.println(game);
+			int row = keyboard.nextInt(), column = keyboard.nextInt();
+			if (game.putStone(row, column));
+			else {
+				System.out.println(game.putStoneErrorMsg);
+			}
+		}
+		
+		System.out.println(game);
 	}
 }
