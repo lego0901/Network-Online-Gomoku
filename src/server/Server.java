@@ -14,6 +14,7 @@ public class Server {
 	public static LinkedList<ServerThread> threads;
 	public static LinkedList<Player> players;
 	public static LinkedList<Room> rooms;
+	//public static LinkedList<Opponent> opponents;
 
 	public static boolean addRoom(String roomID) {
 		synchronized (rooms) {
@@ -49,6 +50,14 @@ public class Server {
 		for (Player player : players) {
 			if (player.id.equals(playerID))
 				return player;
+		}
+		return null;
+	}
+
+	public static ServerThread fetchThread(String playerID) {
+		for (ServerThread thread : threads) {
+			if (thread.player != null && thread.player.id == playerID)
+				return thread;
 		}
 		return null;
 	}

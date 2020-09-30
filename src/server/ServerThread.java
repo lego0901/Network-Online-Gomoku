@@ -18,6 +18,8 @@ public class ServerThread extends Thread {
 	Socket socket = null;
 	Player player = null;
 
+	ServerThread opponentThread = null;
+
 	BufferedReader reader;
 	PrintWriter writer;
 
@@ -28,14 +30,26 @@ public class ServerThread extends Thread {
 		lastQueryTime = LocalDateTime.now();
 	}
 
+	void debug(String str) {
+		if (Server.printLog)
+			System.out.println(str);
+	}
+
 	void write(String str) {
 		writer.println(str);
 		writer.flush();
 	}
-
-	void debug(String str) {
-		if (Server.printLog)
-			System.out.println(str);
+	
+	void writeOpponent(String str) {
+		if (opponentThread != null) {
+			opponentThread.write("opponent\n" + str);
+		}
+	}
+	
+	void disconnectMeFromOpponentThread() {
+		if (opponentThread != null) {
+			opponentThread.opponentThread = null;
+		}
 	}
 
 	void setTimer() {
@@ -141,8 +155,16 @@ public class ServerThread extends Thread {
 							String roomID = reader.readLine().strip();
 							if (Server.fetchRoom(roomID) != null) {
 								if (player.enterRoom(roomID)) {
+									opponentThread = Server.fetchThread(player.opponentID());
+									opponentThread.opponentThread = this;
+
 									debug("Player " + player.id + " joined the room " + roomID);
 									write("success");
+									write("opponent\njoin\n" + opponentThread.player.id);
+									writeOpponent("join\n" + player.id);
+									if (opponentThread.player.state == PlayerState.READY_ROOM) {
+										write("opponent\nready");
+									}
 								} else {
 									debug("Room " + roomID + " is now full");
 									write("fail");
@@ -164,10 +186,13 @@ public class ServerThread extends Thread {
 							debug("Player " + player.id + " is now ready");
 							player.ready();
 							write("success");
+							writeOpponent("ready");
 						} else if (query.equals("leave")) {
 							player.leaveRoom();
 							debug("Player " + player.id + " leaved the room");
 							write("success");
+							writeOpponent("leave");
+							disconnectMeFromOpponentThread();
 						} else {
 							debug("Invalid query received");
 							write("invalid");
@@ -178,10 +203,13 @@ public class ServerThread extends Thread {
 							player.cancelReady();
 							debug("Player " + player.id + " isn't ready");
 							write("success");
+							writeOpponent("cancel");
 						} else if (query.equals("leave")) {
 							player.leaveRoom();
 							debug("Player " + player.id + " leaved the room");
 							write("success");
+							writeOpponent("leave");
+							disconnectMeFromOpponentThread();
 						} else {
 							debug("Invalid query received");
 							write("invalid");
@@ -201,6 +229,7 @@ public class ServerThread extends Thread {
 							if (player.putStone(row, column)) {
 								debug("Player " + player.id + " put stone on (" + row + ", " + column + ")");
 								write("success");
+								writeOpponent("stone\n" + row + " " + column);
 							} else {
 								debug("Player " + player.id + " cannot put stone on (" + row + ", " + column + ")");
 								debug("Reason: " + player.putStoneErrorMsg());
@@ -213,6 +242,7 @@ public class ServerThread extends Thread {
 							player.setLoser();
 							debug("Surrender by player " + player.id);
 							write("success");
+							writeOpponent("surrender");
 						} else {
 							debug("Invalid query received");
 							write("invalid");
@@ -227,6 +257,7 @@ public class ServerThread extends Thread {
 					closeConnection = true;
 					debug("Client query timeout");
 					write("query timeout");
+					writeOpponent("query timeout");
 				} else {
 					switch (player.state) {
 					case READY_ROOM:
@@ -249,11 +280,12 @@ public class ServerThread extends Thread {
 							player.setLoser();
 							debug("Stone timeout for player " + player.id);
 							write("stone timeout");
+							writeOpponent("stone timeout");
 						} else if (player.isMyGameTerminated()) {
 							player.endGame();
 							debug("Game terminated " + player.id);
 							write("end");
-							
+
 							if (player.isWinner()) {
 								write("you win");
 							} else if (player.isLoser()) {
@@ -264,6 +296,7 @@ public class ServerThread extends Thread {
 						}
 						break;
 					case NOT_MY_TURN:
+						setTimer();
 						if (player.isMyTurn()) {
 							player.setTimer();
 							player.state = PlayerState.MY_TURN;
@@ -272,7 +305,7 @@ public class ServerThread extends Thread {
 							player.endGame();
 							debug("Game terminated " + player.id);
 							write("end");
-							
+
 							if (player.isWinner()) {
 								write("you win");
 							} else if (player.isLoser()) {
@@ -295,7 +328,9 @@ public class ServerThread extends Thread {
 		} catch (InterruptedException ie) {
 			ie.printStackTrace();
 		} finally {
-			debug("try to close");
+			debug("Try to close");
+			writeOpponent("leave");
+			disconnectMeFromOpponentThread();
 			if (player != null) {
 				Server.erasePlayer(player.id);
 				if (player.room != null) {

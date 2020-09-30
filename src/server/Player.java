@@ -61,6 +61,16 @@ public class Player {
 		state = PlayerState.SEARCH_ROOM;
 		room = null;
 	}
+	
+	public String opponentID() {
+		if (room != null && room.isFull()) {
+			if (room.players.get(0) == this)
+				return room.players.get(1).id;
+			else
+				return room.players.get(0).id;
+		}
+		return "";
+	}
 
 	public void ready() {
 		if (state == PlayerState.ENTER_ROOM)
@@ -72,7 +82,7 @@ public class Player {
 			state = PlayerState.ENTER_ROOM;
 	}
 
-	public boolean isPlayingOrReady() {
+	public boolean isReadyOrPlaying() {
 		return state == PlayerState.READY_ROOM || state == PlayerState.MY_TURN || state == PlayerState.NOT_MY_TURN;
 	}
 

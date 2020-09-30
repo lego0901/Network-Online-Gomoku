@@ -40,7 +40,7 @@ public class Room {
 			}
 		}
 		players.add(player);
-		if (players.size() == 2) {
+		if (isFull()) {
 			state = RoomState.FULL_ROOM;
 		}
 	}
@@ -64,11 +64,15 @@ public class Room {
 	}
 
 	public boolean isReady() {
-		return players.size() == 2 && players.get(0).isPlayingOrReady() && players.get(1).isPlayingOrReady();
+		return isFull() && players.get(0).isReadyOrPlaying() && players.get(1).isReadyOrPlaying();
+	}
+	
+	public boolean isFull() {
+		return players.size() == 2;
 	}
 
 	public void setTurnsOfPlayers() {
-		assert (players.size() == 2);
+		assert (isFull());
 		synchronized (players) {
 			for (int turn = 1; turn <= 2; turn++) {
 				players.get(turn - 1).turnID = turn;

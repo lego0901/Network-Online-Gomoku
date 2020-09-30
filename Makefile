@@ -7,7 +7,7 @@ JAVA_SRC=$(wildcard src/*.java src/*/*.java)
 MANIFEST=manifest.mf
 
 
-all: compile server client
+all: compile server client proxy
 
 help:
 	@echo make help: print this message
@@ -27,13 +27,25 @@ server: compile
 	@rm $(MANIFEST)
 
 client: compile
-	@echo "Manifest-Version: 1.0" > $(MANIFEST)
-	@echo "Main-Class: client.Client" >> $(MANIFEST)
+	@echo "manifest-version: 1.0" > $(MANIFEST)
+	@echo "main-class: client.Client" >> $(MANIFEST)
 	@echo "" >> $(MANIFEST)
 	jar cfm client.jar $(MANIFEST) -C bin/ .
 	@rm $(MANIFEST)
 
+proxy: compile
+	@echo "manifest-version: 1.0" > $(MANIFEST)
+	@echo "main-class: client.ProxyClientReader" >> $(MANIFEST)
+	@echo "" >> $(MANIFEST)
+	jar cfm proxy-reader.jar $(MANIFEST) -C bin/ .
+	@rm $(MANIFEST)
+	@echo "manifest-version: 1.0" > $(MANIFEST)
+	@echo "main-class: client.ProxyClientWriter" >> $(MANIFEST)
+	@echo "" >> $(MANIFEST)
+	jar cfm proxy-writer.jar $(MANIFEST) -C bin/ .
+	@rm $(MANIFEST)
+
 clean:
 	rm -rf bin
-	rm server.jar client.jar
+	rm server.jar client.jar proxy-reader.jar proxy-writer.jar
 
