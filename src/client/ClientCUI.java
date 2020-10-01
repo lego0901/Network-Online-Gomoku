@@ -2,7 +2,9 @@ package client;
 
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
 import java.util.Scanner;
+
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
@@ -15,13 +17,26 @@ public class ClientCUI {
 	final static String SERVER_HOST = "147.46.209.30";
 	final static int SERVER_PORT = 20523;
 
-	static enum ClientState {
-		NONE, SEARCH_ROOM, ENTER_ROOM, READY_ROOM, MY_TURN, NOT_MY_TURN, TERMINATED,
-	}
-
 	static BufferedReader reader;
 	static PrintWriter writer;
 	static Scanner keyboard;
+	static Board gameBoard;
+
+	public static int[] parseCoordinates(String str) {
+		String[] parsed = str.split(" ");
+		if (parsed.length != 2)
+			return null;
+
+		int[] rc = new int[2];
+		for (int i = 0; i < 2; i++) {
+			try {
+				rc[i] = Integer.parseInt(parsed[i]);
+			} catch (NumberFormatException nfe) {
+				return null;
+			}
+		}
+		return rc;
+	}
 
 	static void debug(String str) {
 		if (printLog)
@@ -35,9 +50,17 @@ public class ClientCUI {
 
 	public static void main(String[] args) {
 		Socket socket = null;
-		keyboard = new Scanner(System.in);
-		ClientState state = ClientState.NONE;
 		boolean closeConnection = false;
+		String playerID = "";
+		String roomID = "";
+		String opponentID = "";
+		boolean opponentReady = false;
+		Board board = null;
+		int turnID = 0;
+		LocalDateTime lastMove = LocalDateTime.now();
+
+		keyboard = new Scanner(System.in);
+		gameBoard = new Board(11, 11);
 
 		try {
 			socket = new Socket();
@@ -47,189 +70,45 @@ public class ClientCUI {
 			reader = new BufferedReader(new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_8));
 			writer = new PrintWriter(new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_8));
 
-			while (state == ClientState.NONE) {
-				System.out.println("Please type your nickname\n> ");
+			while (true) {
+				System.out.println("Please type your nickname");
 				String id = keyboard.nextLine();
 				write("player");
 				write(id);
 
 				String response = reader.readLine().strip();
 				if (response.equals("success")) {
-					state = ClientState.SEARCH_ROOM;
+					Player.id = id;
+					break;
 				} else if (response.equals("fail")) {
 					System.out.println("It is an impossible name");
 				}
 			}
 
-			while (!closeConnection) {
+			boolean printCUI = true;
+			
+			while (Player.state != Player.State.EXIT) {
 				if (reader.ready()) {
-					String response = reader.readLine().strip();
-					
-					if (response.equals("query timeout")) {
-						closeConnection = false;
-						break;
-					}
-
-					switch (state) {
-					case SEARCH_ROOM:
-						break;
-					case ENTER_ROOM:
-						if (response.equals("opponent")) {
-							String nextResponse = reader.readLine().strip();
-							if (nextResponse.equals("join")) {
-								// TODO: implement this
-							} else if (nextResponse.equals("ready")) {
-								// TODO: implement this
-							} else if (nextResponse.equals("cancel")) {
-								// TODO: implement this
-							} else if (nextResponse.equals("leave")) {
-								// TODO: implement this
-							} else {
-								System.out.println("Unexpected nextResponse: " + nextResponse);
-							}
-						} else {
-							System.out.println("Unexpected response: " + response);
-						}
-						break;
-					case READY_ROOM:
-						if (response.equals("opponent")) {
-							String nextResponse = reader.readLine().strip();
-							if (nextResponse.equals("join")) {
-								// TODO: implement this
-							} else if (nextResponse.equals("ready")) {
-								// TODO: implement this
-							} else if (nextResponse.equals("cancel")) {
-								// TODO: implement this
-							} else if (nextResponse.equals("leave")) {
-								// TODO: implement this
-							} else {
-								System.out.println("Unexpected nextResponse: " + nextResponse);
-							}
-						} else if (response.equals("play")) {
-							// TODO: implement this
-						} else {
-							System.out.println("Unexpected response: " + response);
-						}
-						break;
-					case MY_TURN:
-						if (response.equals("opponent")) {
-							String nextResponse = reader.readLine().strip();
-							if (nextResponse.equals("leave")) {
-								// TODO: implement this
-							} else if (nextResponse.equals("surrender")) {
-								// TODO: implement this
-							} else {
-								System.out.println("Unexpected nextResponse: " + nextResponse);
-							}
-						} else if (response.equals("stone timeout")) {
-							// TODO: implement this
-						} else if (response.equals("end")) {
-							// TODO: implement this
-						} else {
-							System.out.println("Unexpected response: " + response);
-						}
-						break;
-					case NOT_MY_TURN:
-						if (response.equals("opponent")) {
-							String nextResponse = reader.readLine().strip();
-							if (nextResponse.equals("stone")) {
-								// TODO: implement this
-							} else if (nextResponse.equals("stone timeout")) {
-								// TODO: implement this
-							} else if (nextResponse.equals("leave")) {
-								// TODO: implement this
-							} else if (nextResponse.equals("surrender")) {
-								// TODO: implement this
-							} else {
-								System.out.println("Unexpected nextResponse: " + nextResponse);
-							}
-						} else if (response.equals("end")) {
-							// TODO: implement this
-						} else {
-							System.out.println("Unexpected response: " + response);
-						}
-						break;
-					case TERMINATED:
-					default:
-						closeConnection = true;
-						break;
-					}
-				} else {
-					String query;
-					
-					switch (state) {
-					case SEARCH_ROOM:
-						System.out.println("Please select any action to choose a room");
-						System.out.println("> create");
-						System.out.println("> search");
-						System.out.println("> join");
-						
-						query = keyboard.nextLine();
-						if (query.equals("create")) {
-							// TODO: implement this
-						} else if (query.equals("search")) {
-							// TODO: implement this
-						} else if (query.equals("join")) {
-							// TODO: implement this
-						} else {
-							System.out.println("Unexpected query: " + query);
-						}
-						break;
-					case ENTER_ROOM:
-						System.out.println("Are you ready?");
-						System.out.println("> ready");
-						System.out.println("> leave");
-						
-						query = keyboard.nextLine();
-						if (query.equals("ready")) {
-							// TODO: implement this
-						} else if (query.equals("leave")) {
-							// TODO: implement this
-						} else {
-							System.out.println("Unexpected query: " + query);
-						}
-						break;
-					case READY_ROOM:
-						System.out.println("Are you ready?");
-						System.out.println("> cancel");
-						System.out.println("> leave");
-						
-						query = keyboard.nextLine();
-						if (query.equals("cancel")) {
-							// TODO: implement this
-						} else if (query.equals("leave")) {
-							// TODO: implement this
-						} else {
-							System.out.println("Unexpected query: " + query);
-						}
-						break;
-					case MY_TURN:
-						System.out.println("What do you want to do?");
-						System.out.println("> stone");
-						System.out.println("> surrender");
-						
-						query = keyboard.nextLine();
-						if (query.equals("stone")) {
-							// TODO: implement this
-						} else if (query.equals("surrender")) {
-							// TODO: implement this
-						} else {
-							System.out.println("Unexpected query: " + query);
-						}
-						break;
-					case NOT_MY_TURN:
-						System.out.println("Other's turn");
-						break;
-					case TERMINATED:
-						// TODO: implement this
-						break;
-					default:
-						closeConnection = true;
-						break;
-					}
+					System.out.println("ready?");
+					String response = reader.readLine();
+					if (response.length() >= 8 && response.substring(0, 8) == "opponent")
+						Opponent.processResponse(response.substring(9));
+					else
+						Player.processResponse(response);
+					printCUI = true;
+				} else if (keyboard.hasNextLine()) {
+					System.out.println("keyboard?");
+					String query = keyboard.nextLine().strip();
+					Player.processQuery(query);
+					printCUI = true;
+				}
+				if (printCUI) {
+					Player.repaint();
+					printCUI = false;
 				}
 				Thread.sleep(10);
 			}
+			System.out.println("out?");
 		} catch (IOException ioex) {
 			ioex.printStackTrace();
 		} catch (InterruptedException iex) {
