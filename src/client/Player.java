@@ -2,6 +2,8 @@ package client;
 
 import java.time.LocalDateTime;
 
+import javax.swing.JOptionPane;
+
 public class Player {
 	static enum State {
 		SEARCH_ROOM, ENTER_ROOM, READY_ROOM, MY_TURN, NOT_MY_TURN, TERMINATED, EXIT
@@ -31,7 +33,7 @@ public class Player {
 
 	public static void processQuery(String query) {
 		if (query.equals("close")) {
-			ProxyClientReader.write("close");
+			Client.write("close");
 			state = State.EXIT;
 		}
 
@@ -40,13 +42,13 @@ public class Player {
 			switch (inputState) {
 			case OUT_ROOM:
 				if (query.equals("create")) {
-					ProxyClientReader.write("create");
+					Client.write("create");
 					inputState = InputState.CREATE_ROOM;
 				} else if (query.equals("join")) {
-					ProxyClientReader.write("join");
+					Client.write("join");
 					inputState = InputState.JOIN_ROOM;
 				} else if (query.equals("search")) {
-					ProxyClientReader.write("search");
+					Client.write("search");
 					inputState = InputState.SEARCH_ROOM;
 					searchRoomCnt = -1;
 				} else {
@@ -55,7 +57,7 @@ public class Player {
 				break;
 			case CREATE_ROOM:
 			case JOIN_ROOM:
-				ProxyClientReader.write(query);
+				Client.write(query);
 				roomID = query;
 				break;
 			default:
@@ -66,10 +68,10 @@ public class Player {
 			switch (inputState) {
 			case IN_ROOM:
 				if (query.equals("ready")) {
-					ProxyClientReader.write("ready");
+					Client.write("ready");
 					state = State.READY_ROOM;
 				} else if (query.equals("leave")) {
-					ProxyClientReader.write("leave");
+					Client.write("leave");
 					state = State.SEARCH_ROOM;
 					inputState = InputState.OUT_ROOM;
 				} else {
@@ -84,10 +86,10 @@ public class Player {
 			switch (inputState) {
 			case IN_ROOM:
 				if (query.equals("cancel")) {
-					ProxyClientReader.write("cancel");
+					Client.write("cancel");
 					state = State.ENTER_ROOM;
 				} else if (query.equals("leave")) {
-					ProxyClientReader.write("leave");
+					Client.write("leave");
 					state = State.SEARCH_ROOM;
 					inputState = InputState.OUT_ROOM;
 				} else {
@@ -102,17 +104,17 @@ public class Player {
 			switch (inputState) {
 			case IN_GAME:
 				if (query.equals("stone")) {
-					ProxyClientReader.write("stone");
+					Client.write("stone");
 					inputState = InputState.STONE_GAME;
 				} else if (query.equals("surrender")) {
-					ProxyClientReader.write("surrender");
+					Client.write("surrender");
 					isSurrendered = true;
 				} else {
 					// invalid query
 				}
 				break;
 			case STONE_GAME:
-				ProxyClientReader.write(query);
+				Client.write(query);
 				stoneQuery = query;
 				break;
 			default:
@@ -124,7 +126,7 @@ public class Player {
 			break;
 		case TERMINATED:
 			if (query.equals("leave")) {
-				ProxyClientReader.write("leave");
+				Client.write("leave");
 				state = State.SEARCH_ROOM;
 				inputState = InputState.OUT_ROOM;
 			}
@@ -137,7 +139,6 @@ public class Player {
 
 	public static void processResponse(String response) {
 		if (response.equals("query timeout")) {
-			System.out.println("query timeout");
 			isQueryTimeout = true;
 			state = State.EXIT;
 		}
@@ -150,19 +151,22 @@ public class Player {
 				if (response.equals("success")) {
 					state = State.ENTER_ROOM;
 					inputState = InputState.IN_ROOM;
-					// success msg
+					Client.roomSelectFrame.setVisible(false);
 				} else if (response.equals("fail")) {
 					state = State.SEARCH_ROOM;
 					inputState = InputState.OUT_ROOM;
+					if (2 <= roomID.length() && roomID.length() <= 20)
+						JOptionPane.showMessageDialog(Client.roomSelectFrame, "Invalid room.");
+					else
+						JOptionPane.showMessageDialog(Client.roomSelectFrame, "Room ID should be 2<=|len|<=20.");
 					roomID = "";
-					// fail msg
 				}
 				break;
 			case SEARCH_ROOM:
 				if (searchRoomCnt == -1) {
 					if (response.equals("success")) {
 						searchRoomCnt = -2;
-						System.out.println("Search room result:");
+						Client.roomSelectFrame.initializeRoomLabels();
 					} else if (response.equals("fail")) {
 						inputState = InputState.OUT_ROOM;
 					}
@@ -173,7 +177,8 @@ public class Player {
 						inputState = InputState.OUT_ROOM;
 					}
 				} else {
-					System.out.println(response);
+					Client.roomSelectFrame.addRoomLabel(response);
+					Client.roomSelectFrame.repaint();
 					searchRoomCnt--;
 					if (searchRoomCnt == 0) {
 						state = State.SEARCH_ROOM;
@@ -203,7 +208,8 @@ public class Player {
 
 					turnID = 1;
 					Opponent.turnID = 2;
-					ProxyClientReader.gameBoard.begin(id, Opponent.id);
+					Client.gameBoard.begin(id, Opponent.id);
+					Client.gameFrame.setPlayerTurn();
 				} else if (response.equals("not your turn")) {
 					state = State.NOT_MY_TURN;
 					inputState = InputState.IN_GAME;
@@ -212,7 +218,8 @@ public class Player {
 
 					turnID = 2;
 					Opponent.turnID = 1;
-					ProxyClientReader.gameBoard.begin(Opponent.id, id);
+					Client.gameBoard.begin(Opponent.id, id);
+					Client.gameFrame.setOpponentTurn();
 				}
 
 				isQueryTimeout = false;
@@ -223,6 +230,12 @@ public class Player {
 				Opponent.isStoneTimeout = false;
 				Opponent.isSurrendered = false;
 				Opponent.putStoneOutOfRangeCnt = 0;
+				
+				Client.gameFrame.synchronizeBoard(Client.gameBoard);
+				Client.gameFrame.setPlayerID(id);
+				Client.gameFrame.setOpponentID(Opponent.id);
+				Client.gameFrame.setTimer();
+				Client.gameFrame.setPutStoneErrorMsg("");
 				break;
 			default:
 				// invalid response
@@ -251,8 +264,11 @@ public class Player {
 					Opponent.state = Opponent.State.MY_TURN;
 					putStoneErrorMsgResponse = "";
 
-					int[] rc = ProxyClientReader.parseCoordinates(stoneQuery);
-					ProxyClientReader.gameBoard.board[rc[0]][rc[1]] = turnID;
+					int[] rc = Client.parseCoordinates(stoneQuery);
+					Client.gameBoard.board[rc[0]][rc[1]] = turnID;
+					Client.gameFrame.putStone(rc[0], rc[1], turnID);
+					Client.gameFrame.setTimer();
+					Client.gameFrame.setPutStoneErrorMsg("");
 				} else if (response.equals("fail")) {
 					inputState = InputState.IN_GAME;
 				} else if (response.equals("invalid move")) {
