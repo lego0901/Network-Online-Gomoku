@@ -1,3 +1,9 @@
+/*
+ * Server.java
+ * Author: Woosung Song
+ *
+ * Main server that accepts clients and manage them.
+ */
 package server;
 
 import java.net.Socket;
@@ -6,50 +12,56 @@ import java.io.IOException;
 import java.net.ServerSocket;
 
 public class Server {
+  // Server port number
 	public final static int SERVER_PORT = 20523;
+
+  // To print log on the server program
 	public static boolean printLog = true;
 
+  // To accept clients
 	public static ServerSocket serverSocket;
 
-	public static LinkedList<ServerThread> threads;
+  // Management on the client states
 	public static LinkedList<Player> players;
 	public static LinkedList<Room> rooms;
-	//public static LinkedList<Opponent> opponents;
+	public static LinkedList<ServerThread> threads;
 
-	public static boolean addRoom(String roomID) {
-		if (!Room.isValidRoomID(roomID))
-			return false;
-		synchronized (rooms) {
-			for (Room room : rooms) {
-				if (room.id.equals(roomID))
-					return false;
-			}
-			rooms.add(new Room(roomID));
-			return true;
-		}
-	}
-
+  // Add new player if possible
 	public static boolean addPlayer(String playerID, ServerThread thread) {
 		if (!Player.isValidPlayerID(playerID))
-			return false;
+			return false; // invalid playerID
 		synchronized (players) {
 			for (Player player : players) {
 				if (player.id.equals(playerID))
-					return false;
+					return false; // no duplicate allowed
 			}
 			players.add(new Player(playerID, thread));
 			return true;
 		}
 	}
 
-	public static Room fetchRoom(String roomID) {
-		for (Room room : rooms) {
-			if (room.id.equals(roomID))
-				return room;
+  // Add new room if possible
+	public static boolean addRoom(String roomID) {
+		if (!Room.isValidRoomID(roomID))
+			return false; // invalid roomID
+		synchronized (rooms) {
+			for (Room room : rooms) {
+				if (room.id.equals(roomID))
+					return false; // no duplicate allowed
+			}
+			rooms.add(new Room(roomID));
+			return true;
 		}
-		return null;
+	}
+	
+  // Add new ServerThread to manage socket connection between clients
+	public static void addThread(ServerThread thread) {
+		synchronized (threads) {
+			threads.add(thread);
+		}	
 	}
 
+  // Fetch player with the given ID. Read process doesn't need synchronization
 	public static Player fetchPlayer(String playerID) {
 		for (Player player : players) {
 			if (player.id.equals(playerID))
@@ -58,6 +70,16 @@ public class Server {
 		return null;
 	}
 
+  // Fetch room with the given ID
+	public static Room fetchRoom(String roomID) {
+		for (Room room : rooms) {
+			if (room.id.equals(roomID))
+				return room;
+		}
+		return null;
+	}
+
+  // Fetch thread with the given playerID
 	public static ServerThread fetchThread(String playerID) {
 		for (ServerThread thread : threads) {
 			if (thread.player != null && thread.player.id == playerID)
@@ -66,19 +88,7 @@ public class Server {
 		return null;
 	}
 
-	public static void eraseRoom(String roomID) {
-		synchronized (rooms) {
-			int idx = -1;
-			for (int i = 0; i < rooms.size(); i++) {
-				if (rooms.get(i).id.equals(roomID)) {
-					idx = i;
-					break;
-				}
-			}
-			rooms.remove(idx);
-		}
-	}
-
+  // Erase player with the given name
 	public static void erasePlayer(String playerID) {
 		synchronized (players) {
 			int idx = -1;
@@ -91,19 +101,29 @@ public class Server {
 			players.remove(idx);
 		}
 	}
-	
-	public static void addThread(ServerThread thread) {
-		synchronized (threads) {
-			threads.add(thread);
-		}	
+
+  // Erase room with the given id
+	public static void eraseRoom(String roomID) {
+		synchronized (rooms) {
+			int idx = -1;
+			for (int i = 0; i < rooms.size(); i++) {
+				if (rooms.get(i).id.equals(roomID)) {
+					idx = i;
+					break;
+				}
+			}
+			rooms.remove(idx);
+		}
 	}
 	
+  // Erase ServerThread
 	public static void eraseThread(ServerThread thread) {
 		synchronized (threads) {
 			threads.remove(thread);
 		}
 	}
 	
+  // Print out the server status
 	public static void debug() {
 		System.out.println();
 		System.out.println("(Threads)");
@@ -120,6 +140,8 @@ public class Server {
 		}
 	}
 
+  // Server main process. An asynchronous server that accepts multiple clients.
+  // Just accept clients and run ServerThread for each one.
 	public static void main(String[] args) {
 		serverSocket = null;
 		threads = new LinkedList<ServerThread>();
@@ -128,12 +150,13 @@ public class Server {
 
 		try {
 			serverSocket = new ServerSocket(SERVER_PORT);
-			System.out.println("Bind complete");
+			System.out.println("Bind to port " + SERVER_PORT + " success");
 
 			while (true) {
 				Socket socket = serverSocket.accept();
 				System.out.println("New connection created");
 
+        // Create a new ServerThread for each connection
 				ServerThread thread = new ServerThread(socket);
 				thread.start();
 				addThread(thread);

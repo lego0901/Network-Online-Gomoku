@@ -29,44 +29,44 @@ import java.awt.Dialog.ModalExclusionType;
 
 public class GameFrame extends JFrame {
 	private static final long serialVersionUID = 1L;
-	private static final ImageIcon empty = new ImageIcon("./resource/empty.png");
-	private static final ImageIcon lu0 = new ImageIcon("./resource/lu0.png");
-	private static final ImageIcon ld0 = new ImageIcon("./resource/ld0.png");
-	private static final ImageIcon ru0 = new ImageIcon("./resource/ru0.png");
-	private static final ImageIcon rd0 = new ImageIcon("./resource/rd0.png");
-	private static final ImageIcon lu1 = new ImageIcon("./resource/lu1.png");
-	private static final ImageIcon ld1 = new ImageIcon("./resource/ld1.png");
-	private static final ImageIcon ru1 = new ImageIcon("./resource/ru1.png");
-	private static final ImageIcon rd1 = new ImageIcon("./resource/rd1.png");
-	private static final ImageIcon lu2 = new ImageIcon("./resource/lu2.png");
-	private static final ImageIcon ld2 = new ImageIcon("./resource/ld2.png");
-	private static final ImageIcon ru2 = new ImageIcon("./resource/ru2.png");
-	private static final ImageIcon rd2 = new ImageIcon("./resource/rd2.png");
-	private static final ImageIcon l0 = new ImageIcon("./resource/l0.png");
-	private static final ImageIcon r0 = new ImageIcon("./resource/r0.png");
-	private static final ImageIcon u0 = new ImageIcon("./resource/u0.png");
-	private static final ImageIcon d0 = new ImageIcon("./resource/d0.png");
-	private static final ImageIcon l1 = new ImageIcon("./resource/l1.png");
-	private static final ImageIcon r1 = new ImageIcon("./resource/r1.png");
-	private static final ImageIcon u1 = new ImageIcon("./resource/u1.png");
-	private static final ImageIcon d1 = new ImageIcon("./resource/d1.png");
-	private static final ImageIcon l2 = new ImageIcon("./resource/l2.png");
-	private static final ImageIcon r2 = new ImageIcon("./resource/r2.png");
-	private static final ImageIcon u2 = new ImageIcon("./resource/u2.png");
-	private static final ImageIcon d2 = new ImageIcon("./resource/d2.png");
-	private static final ImageIcon n0 = new ImageIcon("./resource/0.png");
-	private static final ImageIcon n1 = new ImageIcon("./resource/1.png");
-	private static final ImageIcon n2 = new ImageIcon("./resource/2.png");
+	private static final ImageIcon EMPTY = new ImageIcon("./resource/empty.png");
+	private static final ImageIcon LU0 = new ImageIcon("./resource/lu0.png");
+	private static final ImageIcon LD0 = new ImageIcon("./resource/ld0.png");
+	private static final ImageIcon RU0 = new ImageIcon("./resource/ru0.png");
+	private static final ImageIcon RD0 = new ImageIcon("./resource/rd0.png");
+	private static final ImageIcon LU1 = new ImageIcon("./resource/lu1.png");
+	private static final ImageIcon LD1 = new ImageIcon("./resource/ld1.png");
+	private static final ImageIcon RU1 = new ImageIcon("./resource/ru1.png");
+	private static final ImageIcon RD1 = new ImageIcon("./resource/rd1.png");
+	private static final ImageIcon LU2 = new ImageIcon("./resource/lu2.png");
+	private static final ImageIcon LD2 = new ImageIcon("./resource/ld2.png");
+	private static final ImageIcon RU2 = new ImageIcon("./resource/ru2.png");
+	private static final ImageIcon RD2 = new ImageIcon("./resource/rd2.png");
+	private static final ImageIcon L0 = new ImageIcon("./resource/l0.png");
+	private static final ImageIcon R0 = new ImageIcon("./resource/r0.png");
+	private static final ImageIcon U0 = new ImageIcon("./resource/u0.png");
+	private static final ImageIcon D0 = new ImageIcon("./resource/d0.png");
+	private static final ImageIcon L1 = new ImageIcon("./resource/l1.png");
+	private static final ImageIcon R1 = new ImageIcon("./resource/r1.png");
+	private static final ImageIcon U1 = new ImageIcon("./resource/u1.png");
+	private static final ImageIcon D1 = new ImageIcon("./resource/d1.png");
+	private static final ImageIcon L2 = new ImageIcon("./resource/l2.png");
+	private static final ImageIcon R2 = new ImageIcon("./resource/r2.png");
+	private static final ImageIcon U2 = new ImageIcon("./resource/u2.png");
+	private static final ImageIcon D2 = new ImageIcon("./resource/d2.png");
+	private static final ImageIcon N0 = new ImageIcon("./resource/0.png");
+	private static final ImageIcon N1 = new ImageIcon("./resource/1.png");
+	private static final ImageIcon N2 = new ImageIcon("./resource/2.png");
 
-	private static final ImageIcon LU[] = { lu0, lu1, lu2 };
-	private static final ImageIcon LD[] = { ld0, ld1, ld2 };
-	private static final ImageIcon RU[] = { ru0, ru1, ru2 };
-	private static final ImageIcon RD[] = { rd0, rd1, rd2 };
-	private static final ImageIcon L[] = { l0, l1, l2 };
-	private static final ImageIcon R[] = { r0, r1, r2 };
-	private static final ImageIcon U[] = { u0, u1, u2 };
-	private static final ImageIcon D[] = { d0, d1, d2 };
-	private static final ImageIcon N[] = { n0, n1, n2 };
+	private static final ImageIcon LU[] = { LU0, LU1, LU2 };
+	private static final ImageIcon LD[] = { LD0, LD1, LD2 };
+	private static final ImageIcon RU[] = { RU0, RU1, RU2 };
+	private static final ImageIcon RD[] = { RD0, RD1, RD2 };
+	private static final ImageIcon L[] = { L0, L1, L2 };
+	private static final ImageIcon R[] = { R0, R1, R2 };
+	private static final ImageIcon U[] = { U0, U1, U2 };
+	private static final ImageIcon D[] = { D0, D1, D2 };
+	private static final ImageIcon N[] = { N0, N1, N2 };
 
 	private JPanel contentPane;
 
@@ -100,7 +100,7 @@ public class GameFrame extends JFrame {
 				int column = j - 1;
 
 				if (row < 0 || row >= 11 || column < 0 || column >= 11) {
-					boardLabels[i][j].setIcon(empty);
+					boardLabels[i][j].setIcon(EMPTY);
 					continue;
 				}
 
@@ -286,7 +286,7 @@ public class GameFrame extends JFrame {
 			for (int j = 0; j < 13; j++) {
 				int row = i - 1;
 				int column = j - 1;
-				boardLabels[i][j] = new JLabel(empty);
+				boardLabels[i][j] = new JLabel(EMPTY);
 				panel.add(boardLabels[i][j]);
 				boardLabels[i][j].setBounds(j * 22, i * 22, 22, 22);
 				boardLabels[i][j].addMouseListener((MouseListener) new MouseAdapter() {
