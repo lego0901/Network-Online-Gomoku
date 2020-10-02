@@ -22,11 +22,10 @@ public class Opponent {
 
 	public static void processResponse(String response) {
 		if (response.equals("query timeout")) {
-			System.out.println("opponent query timeout");
 			isQueryTimeout = true;
 			state = State.NONE;
+			inputState = InputState.NONE;
 		} else if (response.equals("leave")) {
-			System.out.println("Opponent leaved");
 			state = State.NONE;
 			inputState = InputState.NONE;
 		}
@@ -89,19 +88,25 @@ public class Opponent {
 				}
 				break;
 			case STONE_GAME:
-				int[] rc = ProxyClientReader.parseCoordinates(response);
-				ProxyClientReader.gameBoard.board[rc[0]][rc[1]] = turnID;
+				int[] rc = Client.parseCoordinates(response);
+				Client.gameBoard.board[rc[0]][rc[1]] = turnID;
 
 				state = State.NOT_MY_TURN;
 				inputState = InputState.IN_GAME;
 				Player.state = Player.State.MY_TURN;
+				Client.gameFrame.putStone(rc[0], rc[1], turnID);
+				Client.gameFrame.setTimer();
 				break;
 			default:
 				// invalid response
 			}
 			break;
 		case NOT_MY_TURN:
-			// invalid response
+			if (response.equals("surrender")) {
+				isSurrendered = true;
+			} else {
+				// invalid response
+			}
 			break;
 		case TERMINATED:
 			// you win, you lose, you draw
