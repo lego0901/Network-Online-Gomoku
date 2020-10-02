@@ -321,7 +321,7 @@ public class Player {
 				inputState = InputState.END_GAME;
 				if (Opponent.state != Opponent.State.NONE) {
 					Opponent.state = Opponent.State.TERMINATED;
-					Opponent.inputState = Opponent.InputState.IN_ROOM;
+					Opponent.inputState = Opponent.InputState.NONE;
 				}
 				terminateTime = LocalDateTime.now();
 			} else {

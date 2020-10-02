@@ -215,12 +215,13 @@ public class Client {
 				if (Player.state == Player.State.TERMINATED) {
 					if (Duration.between(Player.terminateTime, LocalDateTime.now())
 							.getSeconds() >= WAIT_AFTER_TERMINATE) {
-						Player.state = Player.State.ENTER_ROOM;
-						Player.inputState = Player.InputState.IN_ROOM;
-						if (Opponent.state != Opponent.State.NONE) {
-							Opponent.state = Opponent.State.ENTER_ROOM;
-							Opponent.inputState = Opponent.InputState.IN_ROOM;
-						}
+						Player.state = Player.State.SEARCH_ROOM;
+						Player.inputState = Player.InputState.SEARCH_ROOM;
+						Opponent.state = Opponent.State.NONE;
+						Opponent.inputState = Opponent.InputState.NONE;
+						write("leave");
+						Thread.sleep(100);
+						write("search");
 						displayGUI = true;
 					}
 				}

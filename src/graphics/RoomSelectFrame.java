@@ -62,7 +62,6 @@ public class RoomSelectFrame extends JFrame {
 	}
 	
 	public void addRoomLabel(String roomInfo) {
-		System.out.println("roomInfo " + roomInfo);
 		JLabel roomLabel = new JLabel(roomInfo);
 		roomLabel.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, Color.BLACK));
 		if (roomInfo.substring(0, 6).equals("(wait)"))
