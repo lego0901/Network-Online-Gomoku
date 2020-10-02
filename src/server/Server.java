@@ -17,6 +17,8 @@ public class Server {
 	//public static LinkedList<Opponent> opponents;
 
 	public static boolean addRoom(String roomID) {
+		if (!Room.isValidRoomID(roomID))
+			return false;
 		synchronized (rooms) {
 			for (Room room : rooms) {
 				if (room.id.equals(roomID))
@@ -28,6 +30,8 @@ public class Server {
 	}
 
 	public static boolean addPlayer(String playerID, ServerThread thread) {
+		if (!Player.isValidPlayerID(playerID))
+			return false;
 		synchronized (players) {
 			for (Player player : players) {
 				if (player.id.equals(playerID))

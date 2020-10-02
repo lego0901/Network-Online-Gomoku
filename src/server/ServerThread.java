@@ -42,7 +42,7 @@ public class ServerThread extends Thread {
 	
 	void writeOpponent(String str) {
 		if (opponentThread != null) {
-			opponentThread.write("opponent\n" + str);
+			opponentThread.write("opponent " + str);
 		}
 	}
 	
@@ -122,6 +122,7 @@ public class ServerThread extends Thread {
 				} else if (isThreadTimeout()) {
 					debug("Client query timeout");
 					write("query timeout");
+					writeOpponent("query timeout");
 					closeConnection = true;
 				}
 				sleep(10);
@@ -160,10 +161,12 @@ public class ServerThread extends Thread {
 
 									debug("Player " + player.id + " joined the room " + roomID);
 									write("success");
-									write("opponent\njoin\n" + opponentThread.player.id);
-									writeOpponent("join\n" + player.id);
+									write("opponent join");
+									write("opponent " + opponentThread.player.id);
+									writeOpponent("join");
+									writeOpponent(player.id);
 									if (opponentThread.player.state == PlayerState.READY_ROOM) {
-										write("opponent\nready");
+										write("opponent ready");
 									}
 								} else {
 									debug("Room " + roomID + " is now full");
@@ -176,22 +179,19 @@ public class ServerThread extends Thread {
 							Server.debug();
 						} else if (query.equals("search")) {
 							write("success");
-							write("search result");
 							write("" + Server.rooms.size());
 							
 							// print waiting room first
 							for (Room room : Server.rooms) {
 								if (!room.isFull()) {
-									write("wait");
-									write(room.id);
+									write("(wait) " + room.id);
 								}
 							}
 							
 							// print full room after
 							for (Room room : Server.rooms) {
 								if (room.isFull()) {
-									write("full");
-									write(room.id);
+									write("(full) " + room.id);
 								}
 							}
 						} else {
@@ -247,12 +247,14 @@ public class ServerThread extends Thread {
 							if (player.putStone(row, column)) {
 								debug("Player " + player.id + " put stone on (" + row + ", " + column + ")");
 								write("success");
-								writeOpponent("stone\n" + row + " " + column);
+								writeOpponent("stone");
+								writeOpponent("" + row + " " + column);
 							} else {
 								debug("Player " + player.id + " cannot put stone on (" + row + ", " + column + ")");
 								debug("Reason: " + player.putStoneErrorMsg());
 								write("invalid move");
 								write(player.putStoneErrorMsg());
+								writeOpponent(player.putStoneErrorMsg());
 							}
 							System.out.println(player.room.game);
 							Server.debug();

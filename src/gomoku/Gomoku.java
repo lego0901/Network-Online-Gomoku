@@ -13,6 +13,8 @@ public class Gomoku {
 	public boolean terminated;
 	public int outOfRangeCount[];
 	public String putStoneErrorMsg;
+	
+	public static boolean isStoneTimeout = false;
 
 	private static final int numDirections = 4;
 	private static final int diffRows[] = { 0, 1, 1, 1 };
@@ -40,10 +42,10 @@ public class Gomoku {
 		if (isOutOfRange(row, column)) {
 			putStoneErrorMsg = "Stone out of range (error count = " + (++outOfRangeCount[turn - 1]) + ")";
 
-			if (outOfRangeCount[turn - 1] > 1) {
+			if (outOfRangeCount[turn - 1] >= 2) {
 				winner = nextTurn(turn);
 				terminated = true;
-				return true;
+				return false;
 			} else {
 				return false;
 			}

@@ -10,7 +10,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 
-public class Client {
+public class NaiveClient {
 	final static String SERVER_HOST = "147.46.209.30";
 	final static int SERVER_PORT = 20523;
 	
