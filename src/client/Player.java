@@ -122,7 +122,10 @@ public class Player {
 			}
 			break;
 		case NOT_MY_TURN:
-			// invalid query
+			if (query.equals("surrender")) {
+				Client.write(query);
+				isSurrendered = true;
+			}
 			break;
 		case TERMINATED:
 			if (query.equals("leave")) {
@@ -226,11 +229,12 @@ public class Player {
 				isStoneTimeout = false;
 				isSurrendered = false;
 				putStoneOutOfRangeCnt = 0;
+				putStoneErrorMsgResponse = "";
 				Opponent.isQueryTimeout = false;
 				Opponent.isStoneTimeout = false;
 				Opponent.isSurrendered = false;
 				Opponent.putStoneOutOfRangeCnt = 0;
-				
+
 				Client.gameFrame.synchronizeBoard(Client.gameBoard);
 				Client.gameFrame.setPlayerID(id);
 				Client.gameFrame.setOpponentID(Opponent.id);
@@ -327,6 +331,28 @@ public class Player {
 		case TERMINATED:
 			// you win, you lose, you draw
 			terminateResponse = response;
+			if (terminateResponse.equals("you win")) {
+				Client.gameFrame.setPlayerWin();
+			} else if (terminateResponse.equals("you lose")) {
+				Client.gameFrame.setPlayerLose();
+			} else {
+				Client.gameFrame.setPlayerDraw();
+				Client.gameFrame.setTerminateReason("You have put 50 stones");
+			}
+			if (isStoneTimeout)
+				Client.gameFrame.setTerminateReason("Timeout on stone");
+			if (Opponent.isStoneTimeout)
+				Client.gameFrame.setTerminateReason("Opponent's timeout on stone");
+			if (isSurrendered)
+				Client.gameFrame.setTerminateReason("You surrendered");
+			if (Opponent.isSurrendered)
+				Client.gameFrame.setTerminateReason("Opponent surrendered");
+			if (putStoneOutOfRangeCnt >= 2)
+				Client.gameFrame.setTerminateReason("You put stones out of board x2");
+			if (Opponent.putStoneOutOfRangeCnt >= 2)
+				Client.gameFrame.setTerminateReason("Opponent put stones out of board x2");
+			if (Opponent.state == Opponent.State.NONE)
+				Client.gameFrame.setTerminateReason("Opponent disconnected");
 			break;
 		case EXIT:
 			// may be the response is "bye"

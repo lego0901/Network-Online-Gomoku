@@ -59,8 +59,8 @@ public class PlayerIDFrame extends JFrame {
 		setContentPane(contentPane);
 		contentPane.setLayout(null);
 
-		JLabel playerIDHelpLabel = new JLabel("Please type a player name");
-		playerIDHelpLabel.setFont(new Font("Arial", Font.BOLD, 16));
+		JLabel playerIDHelpLabel = new JLabel("Please type your player name");
+		playerIDHelpLabel.setFont(new Font("Georgia", Font.BOLD, 16));
 		playerIDHelpLabel.setHorizontalAlignment(SwingConstants.CENTER);
 		playerIDHelpLabel.setBounds(50, 157, 300, 30);
 		contentPane.add(playerIDHelpLabel);
@@ -68,7 +68,7 @@ public class PlayerIDFrame extends JFrame {
 		JTextField playerIDTextField = new JTextField();
 		playerIDTextField.setText("");
 		playerIDTextField.setHorizontalAlignment(SwingConstants.CENTER);
-		playerIDTextField.setFont(new Font("Arial", Font.PLAIN, 15));
+		playerIDTextField.setFont(new Font("Georgia", Font.PLAIN, 15));
 		playerIDTextField.setBounds(50, 225, 300, 35);
 		playerIDTextField.setColumns(10);
 		playerIDTextField.addKeyListener(new KeyAdapter() {
@@ -83,7 +83,7 @@ public class PlayerIDFrame extends JFrame {
 
 		JButton playerIDConfirmButton = new JButton("Confirm");
 		playerIDConfirmButton.setBackground(Color.LIGHT_GRAY);
-		playerIDConfirmButton.setFont(new Font("Arial", Font.PLAIN, 12));
+		playerIDConfirmButton.setFont(new Font("Georgia", Font.PLAIN, 12));
 		playerIDConfirmButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				Client.pendQuery(playerIDTextField.getText().strip());
@@ -95,7 +95,7 @@ public class PlayerIDFrame extends JFrame {
 		playerIDErrorMsg = new JLabel("");
 		playerIDErrorMsg.setForeground(Color.RED);
 		playerIDErrorMsg.setHorizontalAlignment(SwingConstants.CENTER);
-		playerIDErrorMsg.setFont(new Font("Arial", Font.PLAIN, 12));
+		playerIDErrorMsg.setFont(new Font("Georgia", Font.PLAIN, 12));
 		playerIDErrorMsg.setBounds(50, 196, 300, 30);
 		contentPane.add(playerIDErrorMsg);
 	}

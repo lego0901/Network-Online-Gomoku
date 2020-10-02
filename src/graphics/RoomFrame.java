@@ -62,12 +62,12 @@ public class RoomFrame extends JFrame {
 	public void setPlayerReadyOrCancel(boolean ready) {
 		if (ready) {
 			isPlayerReady = true;
-			playerIDLabel.setFont(new Font("Arial", Font.BOLD, 16));
+			playerIDLabel.setFont(new Font("Georgia", Font.BOLD, 16));
 			playerIDLabel.setText(playerID + " (Ready)");
-			roomReadyOrCancelButton.setText("Cancel Ready");
+			roomReadyOrCancelButton.setText("Cancel");
 		} else {
 			isPlayerReady = false;
-			playerIDLabel.setFont(new Font("Arial", Font.PLAIN, 16));
+			playerIDLabel.setFont(new Font("Georgia", Font.PLAIN, 16));
 			playerIDLabel.setText(playerID);
 			roomReadyOrCancelButton.setText("Ready");
 		}
@@ -83,10 +83,10 @@ public class RoomFrame extends JFrame {
 	
 	public void setOpponentReadyOrCancel(boolean ready) {
 		if (ready) {
-			opponentIDLabel.setFont(new Font("Arial", Font.BOLD, 16));
+			opponentIDLabel.setFont(new Font("Georgia", Font.BOLD, 16));
 			opponentIDLabel.setText(opponentID + " (ready)");
 		} else {
-			opponentIDLabel.setFont(new Font("Arial", Font.PLAIN, 16));
+			opponentIDLabel.setFont(new Font("Georgia", Font.PLAIN, 16));
 			opponentIDLabel.setText(opponentID);
 		}
 	}
@@ -110,32 +110,32 @@ public class RoomFrame extends JFrame {
 		contentPane.setLayout(null);
 
 		JLabel roomHelpLabel = new JLabel("Waiting for a game");
-		roomHelpLabel.setFont(new Font("Arial", Font.BOLD, 16));
+		roomHelpLabel.setFont(new Font("Georgia", Font.BOLD, 16));
 		roomHelpLabel.setHorizontalAlignment(SwingConstants.CENTER);
 		roomHelpLabel.setBounds(50, 68, 300, 30);
 		contentPane.add(roomHelpLabel);
 		
 		roomIDLabel = new JLabel("Room ID: ");
 		roomIDLabel.setHorizontalAlignment(SwingConstants.CENTER);
-		roomIDLabel.setFont(new Font("Arial", Font.PLAIN, 12));
+		roomIDLabel.setFont(new Font("Georgia", Font.PLAIN, 12));
 		roomIDLabel.setBounds(50, 108, 300, 30);
 		contentPane.add(roomIDLabel);
 		
 		playerIDLabel = new JLabel("playerID");
 		playerIDLabel.setHorizontalAlignment(SwingConstants.CENTER);
-		playerIDLabel.setFont(new Font("Arial", Font.PLAIN, 16));
+		playerIDLabel.setFont(new Font("Georgia", Font.PLAIN, 16));
 		playerIDLabel.setBounds(50, 209, 300, 30);
 		contentPane.add(playerIDLabel);
 		
 		JLabel roomVSLabel = new JLabel("v.s.");
-		roomVSLabel.setFont(new Font("Arial", Font.PLAIN, 12));
+		roomVSLabel.setFont(new Font("Georgia", Font.PLAIN, 12));
 		roomVSLabel.setHorizontalAlignment(SwingConstants.CENTER);
 		roomVSLabel.setBounds(50, 249, 300, 30);
 		contentPane.add(roomVSLabel);
 		
 		opponentIDLabel = new JLabel("opponentID");
 		opponentIDLabel.setHorizontalAlignment(SwingConstants.CENTER);
-		opponentIDLabel.setFont(new Font("Arial", Font.PLAIN, 16));
+		opponentIDLabel.setFont(new Font("Georgia", Font.PLAIN, 16));
 		opponentIDLabel.setBounds(50, 289, 300, 30);
 		contentPane.add(opponentIDLabel);
 		
@@ -146,13 +146,13 @@ public class RoomFrame extends JFrame {
 				Client.pendQuery("search");
 			}
 		});
-		roomLeaveButton.setFont(new Font("Arial", Font.PLAIN, 12));
+		roomLeaveButton.setFont(new Font("Georgia", Font.PLAIN, 12));
 		roomLeaveButton.setBackground(Color.LIGHT_GRAY);
 		roomLeaveButton.setBounds(89, 450, 97, 23);
 		contentPane.add(roomLeaveButton);
 		
 		roomReadyOrCancelButton = new JButton("Ready");
-		roomReadyOrCancelButton.setFont(new Font("Arial", Font.PLAIN, 12));
+		roomReadyOrCancelButton.setFont(new Font("Georgia", Font.PLAIN, 12));
 		roomReadyOrCancelButton.setBackground(Color.LIGHT_GRAY);
 		roomReadyOrCancelButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {

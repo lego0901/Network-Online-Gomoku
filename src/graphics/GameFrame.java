@@ -172,14 +172,14 @@ public class GameFrame extends JFrame {
 
 	public void setPlayerTurn() {
 		gameHelpLabel.setText("Your Turn");
-		playerIDLabel.setFont(new Font("Arial", Font.BOLD, 16));
-		opponentIDLabel.setFont(new Font("Arial", Font.PLAIN, 16));
+		playerIDLabel.setFont(new Font("Georgia", Font.BOLD, 16));
+		opponentIDLabel.setFont(new Font("Georgia", Font.PLAIN, 16));
 	}
 
 	public void setOpponentTurn() {
 		gameHelpLabel.setText("Opponent's Turn");
-		playerIDLabel.setFont(new Font("Arial", Font.PLAIN, 16));
-		opponentIDLabel.setFont(new Font("Arial", Font.BOLD, 16));
+		playerIDLabel.setFont(new Font("Georgia", Font.PLAIN, 16));
+		opponentIDLabel.setFont(new Font("Georgia", Font.BOLD, 16));
 	}
 
 	public void setPutStoneErrorMsg(String errorMsg) {
@@ -235,26 +235,26 @@ public class GameFrame extends JFrame {
 		contentPane.setLayout(null);
 
 		gameHelpLabel = new JLabel("Your Turn");
-		gameHelpLabel.setFont(new Font("Arial", Font.BOLD, 16));
+		gameHelpLabel.setFont(new Font("Georgia", Font.BOLD, 16));
 		gameHelpLabel.setHorizontalAlignment(SwingConstants.CENTER);
 		gameHelpLabel.setBounds(50, 27, 300, 30);
 		contentPane.add(gameHelpLabel);
 
 		playerIDLabel = new JLabel("playerID");
 		playerIDLabel.setHorizontalAlignment(SwingConstants.CENTER);
-		playerIDLabel.setFont(new Font("Arial", Font.PLAIN, 16));
+		playerIDLabel.setFont(new Font("Georgia", Font.PLAIN, 16));
 		playerIDLabel.setBounds(12, 67, 140, 30);
 		contentPane.add(playerIDLabel);
 
 		timerLabel = new JLabel("60");
-		timerLabel.setFont(new Font("Arial", Font.PLAIN, 12));
+		timerLabel.setFont(new Font("Georgia", Font.PLAIN, 12));
 		timerLabel.setHorizontalAlignment(SwingConstants.CENTER);
 		timerLabel.setBounds(175, 67, 50, 30);
 		contentPane.add(timerLabel);
 
 		opponentIDLabel = new JLabel("opponentID");
 		opponentIDLabel.setHorizontalAlignment(SwingConstants.CENTER);
-		opponentIDLabel.setFont(new Font("Arial", Font.PLAIN, 16));
+		opponentIDLabel.setFont(new Font("Georgia", Font.PLAIN, 16));
 		opponentIDLabel.setBounds(252, 67, 140, 30);
 		contentPane.add(opponentIDLabel);
 
@@ -264,7 +264,7 @@ public class GameFrame extends JFrame {
 				Client.pendQuery("surrender");
 			}
 		});
-		roomLeaveButton.setFont(new Font("Arial", Font.PLAIN, 12));
+		roomLeaveButton.setFont(new Font("Georgia", Font.PLAIN, 12));
 		roomLeaveButton.setBackground(Color.LIGHT_GRAY);
 		roomLeaveButton.setBounds(154, 467, 97, 23);
 		contentPane.add(roomLeaveButton);
@@ -277,7 +277,7 @@ public class GameFrame extends JFrame {
 		putStoneErrorMsg = new JLabel("put stone error msg");
 		putStoneErrorMsg.setForeground(Color.RED);
 		putStoneErrorMsg.setHorizontalAlignment(SwingConstants.CENTER);
-		putStoneErrorMsg.setFont(new Font("Arial", Font.PLAIN, 12));
+		putStoneErrorMsg.setFont(new Font("Georgia", Font.PLAIN, 12));
 		putStoneErrorMsg.setBounds(50, 110, 300, 30);
 		contentPane.add(putStoneErrorMsg);
 

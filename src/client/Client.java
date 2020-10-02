@@ -7,6 +7,8 @@ import java.time.LocalDateTime;
 import java.util.LinkedList;
 import java.util.Queue;
 
+import javax.swing.JOptionPane;
+
 import graphics.GameFrame;
 import graphics.PlayerIDFrame;
 import graphics.RoomFrame;
@@ -25,13 +27,17 @@ public class Client {
 	public final static int SERVER_PORT = 20523;
 
 	public final static int WAIT_AFTER_TERMINATE = 5;
+	public static final int CONNECTION_CHECK_TIMEOUT_SECONDS = 10;
+	public static final int CONNECTION_CHECK_PERIOD = 1;
 
 	public static BufferedReader reader;
 	public static PrintWriter writer;
 	public static Queue<String> queryQueue;
 	public static Board gameBoard;
+	public static LocalDateTime lastConnectionCheckTime;
+	public static LocalDateTime lastConnectionSendTime;
 	public static boolean displayGUI = true;
-	
+
 	public static PlayerIDFrame playerIDFrame;
 	public static RoomSelectFrame roomSelectFrame;
 	public static RoomFrame roomFrame;
@@ -62,11 +68,11 @@ public class Client {
 		writer.println(str);
 		writer.flush();
 	}
-	
+
 	static boolean isQueryPended() {
 		return !queryQueue.isEmpty();
 	}
-	
+
 	static String nextQuery() {
 		while (!isQueryPended()) {
 			try {
@@ -77,16 +83,35 @@ public class Client {
 		}
 		return queryQueue.poll();
 	}
-	
+
 	public static void pendQuery(String query) {
 		queryQueue.add(query);
+	}
+
+	static void setConnectionCheckTimer() {
+		lastConnectionCheckTime = LocalDateTime.now();
+	}
+
+	static void setConnectionSendTimer() {
+		lastConnectionSendTime = LocalDateTime.now();
+	}
+
+	static boolean shouldSendConnectionSend() {
+		return Duration.between(lastConnectionSendTime, LocalDateTime.now()).getSeconds() >= CONNECTION_CHECK_PERIOD;
+	}
+
+	static boolean isConnectionCheckTimeout() {
+		if (lastConnectionCheckTime != null && Duration.between(lastConnectionCheckTime, LocalDateTime.now())
+				.getSeconds() >= CONNECTION_CHECK_TIMEOUT_SECONDS)
+			return true;
+		return false;
 	}
 
 	public static void main(String[] args) {
 		Socket socket = null;
 
 		gameBoard = new Board(11, 11);
-		
+
 		playerIDFrame = new PlayerIDFrame();
 		roomSelectFrame = new RoomSelectFrame();
 		roomFrame = new RoomFrame();
@@ -101,21 +126,51 @@ public class Client {
 			queryQueue = new LinkedList<String>();
 
 			playerIDFrame.setVisible(true);
-			while (true) {
-				String id = nextQuery();
-				write("player");
-				write(id);
+			
+			setConnectionCheckTimer();
+			setConnectionSendTimer();
 
-				String response = reader.readLine().strip();
-				if (response.equals("success")) {
-					Player.id = id;
-					pendQuery("search");
-					break;
-				} else if (response.equals("fail")) {
-					if (2 <= id.length() && id.length() <= 20)
-						playerIDFrame.playerIDErrorMsg.setText("That player ID already exists.");
-					else
-						playerIDFrame.playerIDErrorMsg.setText("The length should be 2<=len<=20.");
+			boolean sendPlayerID = false;
+			String id = "";
+			while (true) {
+				if (isQueryPended()) {
+					String query = nextQuery();
+					
+					if (!sendPlayerID) {
+						sendPlayerID = true;
+						id = query;
+						write("player");
+						write(id);
+					}
+				}
+				if (reader.ready()) {
+					String response = reader.readLine().strip();
+					if (response.equals("connection check")) {
+						setConnectionCheckTimer();
+						Thread.sleep(10);
+					} else if (sendPlayerID) {
+						if (response.equals("success")) {
+							Player.id = id;
+							pendQuery("search");
+							break;
+						} else if (response.equals("fail")) {
+							sendPlayerID = false;
+							if (2 <= id.length() && id.length() <= 20)
+								playerIDFrame.playerIDErrorMsg.setText("That player ID already exists.");
+							else
+								playerIDFrame.playerIDErrorMsg.setText("The length should be 2<=len<=20.");
+						}
+					}
+				}
+				if (shouldSendConnectionSend()) {
+					setConnectionSendTimer();
+					write("connection check");
+				}
+				if (isConnectionCheckTimeout()) {
+					JOptionPane.showMessageDialog(Client.roomSelectFrame, "Disconnected from the server");
+					Thread.sleep(5000);
+					write("close");
+					System.exit(0);
 				}
 			}
 			roomSelectFrame.setBounds(playerIDFrame.getBounds());
@@ -128,10 +183,14 @@ public class Client {
 					GUI.repaint();
 					displayGUI = false;
 				}
-				
+
 				if (reader.ready()) {
 					String response = reader.readLine();
-					if (response.length() >= 8 && response.substring(0, 8).equals("opponent"))
+					if (response.equals("connection check")) {
+						Thread.sleep(10);
+						setConnectionCheckTimer();
+						continue;
+					} else if (response.length() >= 8 && response.substring(0, 8).equals("opponent"))
 						Opponent.processResponse(response.substring(9));
 					else
 						Player.processResponse(response);
@@ -141,7 +200,18 @@ public class Client {
 					Player.processQuery(query);
 					displayGUI = true;
 				}
-				
+
+				if (shouldSendConnectionSend()) {
+					setConnectionSendTimer();
+					write("connection check");
+				}
+				if (isConnectionCheckTimeout()) {
+					JOptionPane.showMessageDialog(Client.roomSelectFrame, "Disconnected from the server");
+					Thread.sleep(5000);
+					write("close");
+					System.exit(0);
+				}
+
 				if (Player.state == Player.State.TERMINATED) {
 					if (Duration.between(Player.terminateTime, LocalDateTime.now())
 							.getSeconds() >= WAIT_AFTER_TERMINATE) {
@@ -157,7 +227,7 @@ public class Client {
 				if (Player.state == Player.State.MY_TURN || Player.state == Player.State.NOT_MY_TURN) {
 					gameFrame.repaintTimer();
 				}
-				
+
 				Thread.sleep(10);
 			}
 		} catch (IOException ioex) {

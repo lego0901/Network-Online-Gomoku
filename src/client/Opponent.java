@@ -102,7 +102,11 @@ public class Opponent {
 			}
 			break;
 		case NOT_MY_TURN:
-			// invalid response
+			if (response.equals("surrender")) {
+				isSurrendered = true;
+			} else {
+				// invalid response
+			}
 			break;
 		case TERMINATED:
 			// you win, you lose, you draw

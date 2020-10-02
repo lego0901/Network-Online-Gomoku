@@ -66,9 +66,9 @@ public class RoomSelectFrame extends JFrame {
 		JLabel roomLabel = new JLabel(roomInfo);
 		roomLabel.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, Color.BLACK));
 		if (roomInfo.substring(0, 6).equals("(wait)"))
-			roomLabel.setFont(new Font("Arial", Font.BOLD, 12));
+			roomLabel.setFont(new Font("Georgia", Font.BOLD, 12));
 		else
-			roomLabel.setFont(new Font("Arial", Font.PLAIN, 12));
+			roomLabel.setFont(new Font("Georgia", Font.PLAIN, 12));
 		
 		roomLabel.addMouseListener((MouseListener) new MouseAdapter() {
 			@Override
@@ -101,14 +101,14 @@ public class RoomSelectFrame extends JFrame {
 		setContentPane(contentPane);
 		contentPane.setLayout(null);
 
-		JLabel roomIDHelpLabel = new JLabel("Please choose the room you want to play");
-		roomIDHelpLabel.setFont(new Font("Arial", Font.BOLD, 16));
+		JLabel roomIDHelpLabel = new JLabel("Please choose a room to play");
+		roomIDHelpLabel.setFont(new Font("Georgia", Font.BOLD, 16));
 		roomIDHelpLabel.setHorizontalAlignment(SwingConstants.CENTER);
 		roomIDHelpLabel.setBounds(50, 32, 300, 30);
 		contentPane.add(roomIDHelpLabel);
 		
 		JLabel roomSearchHelpLabel = new JLabel("Existing rooms lists");
-		roomSearchHelpLabel.setFont(new Font("Arial", Font.PLAIN, 12));
+		roomSearchHelpLabel.setFont(new Font("Georgia", Font.PLAIN, 12));
 		roomSearchHelpLabel.setHorizontalAlignment(SwingConstants.CENTER);
 		roomSearchHelpLabel.setBounds(50, 70, 300, 30);
 		contentPane.add(roomSearchHelpLabel);
@@ -124,7 +124,7 @@ public class RoomSelectFrame extends JFrame {
 		
 		roomIDTextField = new JTextField();
 		roomIDTextField.setHorizontalAlignment(SwingConstants.CENTER);
-		roomIDTextField.setFont(new Font("Arial", Font.PLAIN, 15));
+		roomIDTextField.setFont(new Font("Georgia", Font.PLAIN, 15));
 		roomIDTextField.setBounds(53, 410, 312, 30);
 		contentPane.add(roomIDTextField);
 		roomIDTextField.setColumns(10);
@@ -135,14 +135,14 @@ public class RoomSelectFrame extends JFrame {
 				Client.pendQuery("search");
 			}
 		});
-		roomRefreshButton.setFont(new Font("Arial", Font.PLAIN, 12));
+		roomRefreshButton.setFont(new Font("Georgia", Font.PLAIN, 12));
 		roomRefreshButton.setBackground(Color.LIGHT_GRAY);
 		roomRefreshButton.setBounds(50, 450, 97, 23);
 		contentPane.add(roomRefreshButton);
 
 		JButton roomJoinButton = new JButton("Join");
 		roomJoinButton.setBackground(Color.LIGHT_GRAY);
-		roomJoinButton.setFont(new Font("Arial", Font.PLAIN, 12));
+		roomJoinButton.setFont(new Font("Georgia", Font.PLAIN, 12));
 		roomJoinButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				Client.pendQuery("join");
@@ -153,7 +153,7 @@ public class RoomSelectFrame extends JFrame {
 		contentPane.add(roomJoinButton);
 		
 		JButton roomCreateButton = new JButton("Create");
-		roomCreateButton.setFont(new Font("Arial", Font.PLAIN, 12));
+		roomCreateButton.setFont(new Font("Georgia", Font.PLAIN, 12));
 		roomCreateButton.setBackground(Color.LIGHT_GRAY);
 		roomCreateButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {

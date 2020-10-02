@@ -4,12 +4,6 @@ import java.awt.Rectangle;
 
 public class GUI {
 	public static void repaint() {
-		/*
-		 * System.out.println("state: " + Player.state);
-		 * System.out.println("inputState: " + Player.inputState);
-		 * System.out.println("opponent state: " + Opponent.state);
-		 * System.out.println("opponent inputState: " + Opponent.inputState);
-		 */
 		switch (Player.state) {
 		case SEARCH_ROOM:
 			switch (Player.inputState) {
@@ -88,31 +82,8 @@ public class GUI {
 			}
 			break;
 		case TERMINATED:
-			if (Player.terminateResponse.equals("you win")) {
-				Client.gameFrame.setPlayerWin();
-			} else if (Player.terminateResponse.equals("you lose")) {
-				Client.gameFrame.setPlayerLose();
-			} else {
-				Client.gameFrame.setPlayerDraw();
-				Client.gameFrame.setTerminateReason("You have put 50 stones on the board");
-			}
-			if (Player.isStoneTimeout)
-				Client.gameFrame.setTerminateReason("Timeout on stone");
-			if (Opponent.isStoneTimeout)
-				Client.gameFrame.setTerminateReason("Opponent's timeout on stone");
-			if (Player.isSurrendered)
-				Client.gameFrame.setTerminateReason("You surrendered");
-			if (Opponent.isSurrendered)
-				Client.gameFrame.setTerminateReason("Opponent surrendered");
-			if (Player.putStoneOutOfRangeCnt >= 2)
-				Client.gameFrame.setTerminateReason("You put stones out of the board for 2 times");
-			if (Opponent.putStoneOutOfRangeCnt >= 2)
-				Client.gameFrame.setTerminateReason("Opponent put stones out of the board for 2 times");
-			if (Opponent.state == Opponent.State.NONE)
-				Client.gameFrame.setTerminateReason("Opponent has been disconnected");
 			break;
 		case EXIT:
-			System.out.println("Bye");
 			break;
 		}
 	}
