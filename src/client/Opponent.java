@@ -15,19 +15,22 @@ public class Opponent {
 	public static String id;
 	public static int turnID;
 
+	public static boolean isSurrendered = false;
 	public static boolean isQueryTimeout = false;
 	public static boolean isStoneTimeout = false;
+	public static int putStoneOutOfRangeCnt = 0;
 
 	public static void processResponse(String response) {
 		if (response.equals("query timeout")) {
 			System.out.println("opponent query timeout");
+			isQueryTimeout = true;
 			state = State.NONE;
 		} else if (response.equals("leave")) {
 			System.out.println("Opponent leaved");
 			state = State.NONE;
 			inputState = InputState.NONE;
 		}
- 
+
 		switch (state) {
 		case NONE:
 			switch (inputState) {
@@ -73,8 +76,14 @@ public class Opponent {
 			case IN_GAME:
 				if (response.equals("stone")) {
 					inputState = InputState.STONE_GAME;
+				} else if (response.equals("surrender")) {
+					isSurrendered = true;
 				} else if (response.equals("stone timeout")) {
 					isStoneTimeout = true;
+				} else if (response.equals("Stone out of range (error count = 1)")) {
+					putStoneOutOfRangeCnt = 1;
+				} else if (response.equals("Stone out of range (error count = 2)")) {
+					putStoneOutOfRangeCnt = 2;
 				} else {
 					// invalid response
 				}
@@ -82,10 +91,10 @@ public class Opponent {
 			case STONE_GAME:
 				int[] rc = ProxyClientReader.parseCoordinates(response);
 				ProxyClientReader.gameBoard.board[rc[0]][rc[1]] = turnID;
-				
+
 				state = State.NOT_MY_TURN;
 				inputState = InputState.IN_GAME;
-				Player.state = Player.State.MY_TURN; 
+				Player.state = Player.State.MY_TURN;
 				break;
 			default:
 				// invalid response

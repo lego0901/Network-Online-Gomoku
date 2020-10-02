@@ -1,5 +1,7 @@
 package client;
 
+import java.time.LocalDateTime;
+
 public class Player {
 	static enum State {
 		SEARCH_ROOM, ENTER_ROOM, READY_ROOM, MY_TURN, NOT_MY_TURN, TERMINATED, EXIT
@@ -19,147 +21,31 @@ public class Player {
 	public static int turnID;
 	public static String putStoneErrorMsgResponse = "";
 	public static String terminateResponse = "";
-	
+	public static LocalDateTime lastMoveTime = LocalDateTime.now();
+	public static LocalDateTime terminateTime = LocalDateTime.now();
+
 	public static boolean isQueryTimeout = false;
 	public static boolean isStoneTimeout = false;
-	
-	public static void repaint() {
-		System.out.println("state: " + state);
-		System.out.println("inputState: " + inputState);
-		System.out.println("opponent state: " + Opponent.state);
-		System.out.println("opponent inputState: " + Opponent.inputState);
-		switch (state) {
-		case SEARCH_ROOM:
-			switch (inputState) {
-			case OUT_ROOM:
-				System.out.println("What are you going to do?");
-				System.out.println("> create");
-				System.out.println("> join");
-				System.out.println("> search");
-				break;
-			case CREATE_ROOM:
-				System.out.println("Please type your new room name");
-				break;
-			case JOIN_ROOM:
-				System.out.println("Please type a room name to join");
-				break;
-			default:
-				// invalid state
-			}
-			break;
-		case ENTER_ROOM:
-			switch (inputState) {
-			case IN_ROOM:
-				System.out.println("You are in the room " + roomID);
-				System.out.println("Players:");
-				System.out.println(">> " + id + " (not ready)");
-				if (Opponent.state != Opponent.State.NONE) {
-					System.out.print(">> " + Opponent.id);
-					if (Opponent.state == Opponent.State.ENTER_ROOM)
-						System.out.println(" (not ready)");
-					else
-						System.out.println(" (ready)");
-				}
-				System.out.println("Your possible actions");
-				System.out.println("> ready");
-				System.out.println("> leave");
-				break;
-			default:
-				// invalid state
-			}
-			break;
-		case READY_ROOM:
-			switch (inputState) {
-			case IN_ROOM:
-				System.out.println("You are in the room " + roomID);
-				System.out.println("Players:");
-				System.out.println(">> " + id + " (ready)");
-				if (Opponent.state != Opponent.State.NONE) {
-					System.out.print(">> " + Opponent.id);
-					if (Opponent.state == Opponent.State.ENTER_ROOM)
-						System.out.println(" (not ready)");
-					else
-						System.out.println(" (ready)");
-				}
-				System.out.println("Your possible actions");
-				System.out.println("> cancel");
-				System.out.println("> leave");
-				break;
-			case BEFORE_GAME:
-				System.out.println("Now it begins to play");
-				if (turnID == 1) {
-					System.out.println(">> 1st player: " + id + " (you)");
-					System.out.println(">> 2nd player: " + Opponent.id);
-				} else {
-					System.out.println(">> 1st player: " + Opponent.id);
-					System.out.println(">> 2nd player: " + id + " (you)");
-				}
-				break;
-			default:
-				// invalid state
-			}
-			break;
-		case MY_TURN:
-			switch (inputState) {
-			case IN_GAME:
-				if (!putStoneErrorMsgResponse.equals(""))
-					System.out.println(">> " + putStoneErrorMsgResponse);
-				System.out.println("(Your turn) The board status is");
-				System.out.println(ProxyClientReader.gameBoard);
-				System.out.println("Your possible actions");
-				System.out.println("> stone");
-				System.out.println("> surrender");
-				break;
-			case STONE_GAME:
-				System.out.println("> row column");
-				break;
-			default:
-				// invalid state
-			}
-			break;
-		case NOT_MY_TURN:
-			switch (inputState) {
-			case IN_GAME:
-				System.out.println("(Opponent turn) The board status is");
-				System.out.println(ProxyClientReader.gameBoard);
-				break;
-			default:
-				// invalid state
-			}
-			break;
-		case TERMINATED:
-			System.out.println("Game end");
-			System.out.println(">> " + terminateResponse);
-			if (isStoneTimeout)
-				System.out.println(">> stone timeout");
-			break;
-		case EXIT:
-			System.out.println("Bye");
-			break;
-		}
-	}
+	public static boolean isSurrendered = false;
+	public static int putStoneOutOfRangeCnt = 0;
 
 	public static void processQuery(String query) {
 		if (query.equals("close")) {
-			//ProxyClientReader.write("close");
 			ProxyClientReader.write("close");
 			state = State.EXIT;
 		}
-		
+
 		switch (state) {
 		case SEARCH_ROOM:
 			switch (inputState) {
 			case OUT_ROOM:
 				if (query.equals("create")) {
-					//ProxyClientReader.write("create");
 					ProxyClientReader.write("create");
 					inputState = InputState.CREATE_ROOM;
 				} else if (query.equals("join")) {
-					//ProxyClientReader.write("join");
 					ProxyClientReader.write("join");
 					inputState = InputState.JOIN_ROOM;
 				} else if (query.equals("search")) {
-					//ProxyClientReader.write("search");
 					ProxyClientReader.write("search");
 					inputState = InputState.SEARCH_ROOM;
 					searchRoomCnt = -1;
@@ -169,7 +55,6 @@ public class Player {
 				break;
 			case CREATE_ROOM:
 			case JOIN_ROOM:
-				//ProxyClientReader.write(query);
 				ProxyClientReader.write(query);
 				roomID = query;
 				break;
@@ -181,11 +66,9 @@ public class Player {
 			switch (inputState) {
 			case IN_ROOM:
 				if (query.equals("ready")) {
-					//ProxyClientReader.write("ready");
 					ProxyClientReader.write("ready");
 					state = State.READY_ROOM;
 				} else if (query.equals("leave")) {
-					//ProxyClientReader.write("leave");
 					ProxyClientReader.write("leave");
 					state = State.SEARCH_ROOM;
 					inputState = InputState.OUT_ROOM;
@@ -201,11 +84,9 @@ public class Player {
 			switch (inputState) {
 			case IN_ROOM:
 				if (query.equals("cancel")) {
-					//ProxyClientReader.write("cancel");
 					ProxyClientReader.write("cancel");
 					state = State.ENTER_ROOM;
 				} else if (query.equals("leave")) {
-					//ProxyClientReader.write("leave");
 					ProxyClientReader.write("leave");
 					state = State.SEARCH_ROOM;
 					inputState = InputState.OUT_ROOM;
@@ -221,20 +102,16 @@ public class Player {
 			switch (inputState) {
 			case IN_GAME:
 				if (query.equals("stone")) {
-					//ProxyClientReader.write("stone");
 					ProxyClientReader.write("stone");
 					inputState = InputState.STONE_GAME;
 				} else if (query.equals("surrender")) {
-					//ProxyClientReader.write("surrender");
 					ProxyClientReader.write("surrender");
-					state = State.ENTER_ROOM;
-					inputState = InputState.IN_ROOM;
+					isSurrendered = true;
 				} else {
 					// invalid query
 				}
 				break;
 			case STONE_GAME:
-				//ProxyClientReader.write(query);
 				ProxyClientReader.write(query);
 				stoneQuery = query;
 				break;
@@ -247,7 +124,6 @@ public class Player {
 			break;
 		case TERMINATED:
 			if (query.equals("leave")) {
-				//ProxyClientReader.write("leave");
 				ProxyClientReader.write("leave");
 				state = State.SEARCH_ROOM;
 				inputState = InputState.OUT_ROOM;
@@ -262,9 +138,10 @@ public class Player {
 	public static void processResponse(String response) {
 		if (response.equals("query timeout")) {
 			System.out.println("query timeout");
+			isQueryTimeout = true;
 			state = State.EXIT;
 		}
-		
+
 		switch (state) {
 		case SEARCH_ROOM:
 			switch (inputState) {
@@ -323,7 +200,7 @@ public class Player {
 					inputState = InputState.IN_GAME;
 					Opponent.state = Opponent.State.NOT_MY_TURN;
 					Opponent.inputState = Opponent.InputState.IN_GAME;
-					
+
 					turnID = 1;
 					Opponent.turnID = 2;
 					ProxyClientReader.gameBoard.begin(id, Opponent.id);
@@ -332,11 +209,20 @@ public class Player {
 					inputState = InputState.IN_GAME;
 					Opponent.state = Opponent.State.MY_TURN;
 					Opponent.inputState = Opponent.InputState.IN_GAME;
-					
+
 					turnID = 2;
 					Opponent.turnID = 1;
 					ProxyClientReader.gameBoard.begin(Opponent.id, id);
 				}
+
+				isQueryTimeout = false;
+				isStoneTimeout = false;
+				isSurrendered = false;
+				putStoneOutOfRangeCnt = 0;
+				Opponent.isQueryTimeout = false;
+				Opponent.isStoneTimeout = false;
+				Opponent.isSurrendered = false;
+				Opponent.putStoneOutOfRangeCnt = 0;
 				break;
 			default:
 				// invalid response
@@ -349,8 +235,11 @@ public class Player {
 				} else if (response.equals("end")) {
 					state = State.TERMINATED;
 					inputState = InputState.END_GAME;
-					Opponent.state = Opponent.State.TERMINATED;
-					Opponent.inputState = Opponent.InputState.IN_ROOM;
+					if (Opponent.state != Opponent.State.NONE) {
+						Opponent.state = Opponent.State.TERMINATED;
+						Opponent.inputState = Opponent.InputState.IN_ROOM;
+					}
+					terminateTime = LocalDateTime.now();
 				} else {
 					// invalid response
 				}
@@ -361,9 +250,8 @@ public class Player {
 					inputState = InputState.IN_GAME;
 					Opponent.state = Opponent.State.MY_TURN;
 					putStoneErrorMsgResponse = "";
-					
+
 					int[] rc = ProxyClientReader.parseCoordinates(stoneQuery);
-					//ProxyClientReader.gameBoard.board[rc[0]][rc[1]] = turnID;
 					ProxyClientReader.gameBoard.board[rc[0]][rc[1]] = turnID;
 				} else if (response.equals("fail")) {
 					inputState = InputState.IN_GAME;
@@ -374,8 +262,11 @@ public class Player {
 				} else if (response.equals("end")) {
 					state = State.TERMINATED;
 					inputState = InputState.END_GAME;
-					Opponent.state = Opponent.State.TERMINATED;
-					Opponent.inputState = Opponent.InputState.IN_ROOM;
+					if (Opponent.state != Opponent.State.NONE) {
+						Opponent.state = Opponent.State.TERMINATED;
+						Opponent.inputState = Opponent.InputState.IN_ROOM;
+					}
+					terminateTime = LocalDateTime.now();
 				} else {
 					// invalid response
 				}
@@ -388,9 +279,16 @@ public class Player {
 					inputState = InputState.END_GAME;
 					Opponent.state = Opponent.State.TERMINATED;
 					Opponent.inputState = Opponent.InputState.IN_ROOM;
+					terminateTime = LocalDateTime.now();
 				} else {
 					putStoneErrorMsgResponse = response;
 					inputState = InputState.IN_GAME;
+
+					if (putStoneErrorMsgResponse.equals("Stone out of range (error count = 1)")) {
+						putStoneOutOfRangeCnt = 1;
+					} else if (putStoneErrorMsgResponse.equals("Stone out of range (error count = 2)")) {
+						putStoneOutOfRangeCnt = 2;
+					}
 				}
 				break;
 			default:
@@ -401,6 +299,11 @@ public class Player {
 			if (response.equals("end")) {
 				state = State.TERMINATED;
 				inputState = InputState.END_GAME;
+				if (Opponent.state != Opponent.State.NONE) {
+					Opponent.state = Opponent.State.TERMINATED;
+					Opponent.inputState = Opponent.InputState.IN_ROOM;
+				}
+				terminateTime = LocalDateTime.now();
 			} else {
 				// invalid response
 			}

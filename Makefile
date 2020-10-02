@@ -40,5 +40,5 @@ client: compile
 
 clean:
 	rm -rf bin
-	rm server.jar client.jar proxy-reader.jar proxy-writer.jar
+	rm server.jar reader.jar writer.jar
 

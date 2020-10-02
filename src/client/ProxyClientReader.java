@@ -2,9 +2,8 @@ package client;
 
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.Scanner;
-
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
@@ -18,6 +17,9 @@ public class ProxyClientReader {
 	final static String SERVER_HOST = "147.46.209.30";
 	final static int SERVER_PORT = 20523;
 	final static String WRITER_HOST = "localhost";
+
+	final static int WAIT_AFTER_TERMINATE = 5;
+
 	static int writerPort;
 
 	static BufferedReader proxyReader;
@@ -56,17 +58,9 @@ public class ProxyClientReader {
 	public static void main(String[] args) {
 		ServerSocket proxyServerSocket = null;
 		Socket proxySocket = null;
-		
+
 		Socket socket = null;
-		boolean closeConnection = false;
-		String playerID = "";
-		String roomID = "";
-		String opponentID = "";
-		boolean opponentReady = false;
-		Board board = null;
-		int turnID = 0;
-		LocalDateTime lastMove = LocalDateTime.now();
-		
+
 		gameBoard = new Board(11, 11);
 
 		writerPort = Integer.parseInt(args[0]);
@@ -76,11 +70,11 @@ public class ProxyClientReader {
 			socket.connect(new InetSocketAddress(SERVER_HOST, SERVER_PORT));
 			proxyServerSocket = new ServerSocket(writerPort);
 			proxySocket = proxyServerSocket.accept();
-			debug("Connected successfully!");
 
 			reader = new BufferedReader(new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_8));
 			writer = new PrintWriter(new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_8));
-			proxyReader = new BufferedReader(new InputStreamReader(proxySocket.getInputStream(), StandardCharsets.UTF_8));
+			proxyReader = new BufferedReader(
+					new InputStreamReader(proxySocket.getInputStream(), StandardCharsets.UTF_8));
 
 			while (true) {
 				System.out.println("Please type your nickname");
@@ -96,7 +90,7 @@ public class ProxyClientReader {
 					System.out.println("It is an impossible name");
 				}
 			}
-			
+
 			while (Player.state != Player.State.EXIT) {
 				if (reader.ready()) {
 					String response = reader.readLine();
@@ -111,13 +105,26 @@ public class ProxyClientReader {
 					Player.processQuery(query);
 					printCUI = true;
 				}
+				
+				if (Player.state == Player.State.TERMINATED) {
+					if (Duration.between(Player.terminateTime, LocalDateTime.now())
+							.getSeconds() >= WAIT_AFTER_TERMINATE) {
+						Player.state = Player.State.ENTER_ROOM;
+						Player.inputState = Player.InputState.IN_ROOM;
+						if (Opponent.state != Opponent.State.NONE) {
+							Opponent.state = Opponent.State.ENTER_ROOM;
+							Opponent.inputState = Opponent.InputState.IN_ROOM;
+						}
+						printCUI = true;
+					}
+				}
+				
 				if (printCUI) {
-					Player.repaint();
+					CUI.repaint();
 					printCUI = false;
 				}
 				Thread.sleep(10);
 			}
-			System.out.println("bye");
 		} catch (IOException ioex) {
 			ioex.printStackTrace();
 		} catch (InterruptedException iex) {
@@ -142,4 +149,3 @@ public class ProxyClientReader {
 		}
 	}
 }
-

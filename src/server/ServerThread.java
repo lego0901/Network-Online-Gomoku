@@ -122,6 +122,7 @@ public class ServerThread extends Thread {
 				} else if (isThreadTimeout()) {
 					debug("Client query timeout");
 					write("query timeout");
+					writeOpponent("query timeout");
 					closeConnection = true;
 				}
 				sleep(10);
@@ -253,6 +254,7 @@ public class ServerThread extends Thread {
 								debug("Reason: " + player.putStoneErrorMsg());
 								write("invalid move");
 								write(player.putStoneErrorMsg());
+								writeOpponent(player.putStoneErrorMsg());
 							}
 							System.out.println(player.room.game);
 							Server.debug();
