@@ -1,3 +1,16 @@
+/*
+ * RoomSearchFrame.java
+ * Author: Woosung Song
+ *
+ * GUI in the room before playing the game
+ *
+ *       <Waiting for a game>
+ *          <Room ID: ...>
+ *    <Player ID (ready or not)>
+ *              <v.s.>
+ *   <Opponent ID (ready or not)>
+ *  <Leave> <Ready or cancel button>
+ */
 package graphics;
 
 import java.awt.EventQueue;
@@ -22,35 +35,26 @@ import java.awt.Dialog.ModalExclusionType;
 
 public class RoomFrame extends JFrame {
 	private static final long serialVersionUID = 1L;
-	private JPanel contentPane;
 	
+  // Player and opponent ID info
 	private String playerID;
 	private String opponentID;
+  // Are they ready or not
+	private boolean isPlayerReady = false;
+	private boolean isOpponentReady = false;
 	
+  // Class data
 	private JLabel roomIDLabel;
 	private JLabel playerIDLabel;
 	private JLabel opponentIDLabel;
 	private JButton roomReadyOrCancelButton;
-	private boolean isPlayerReady = false;
-	private boolean isOpponentReady = false;
 
-	public static void main(String[] args) {
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					RoomFrame frame = new RoomFrame();
-					frame.setVisible(true);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
-	}
-	
+  // <Room ID: ...>
 	public void setRoomID(String roomID) {
 		roomIDLabel.setText("Room ID: " + roomID);
 	}
 	
+  // <Player ID (ready or not)>
 	public void setPlayerID(String playerID) {
 		this.playerID = playerID;
 		if (isPlayerReady)
@@ -59,6 +63,7 @@ public class RoomFrame extends JFrame {
 			playerIDLabel.setText(playerID);
 	}
 	
+  // <Player ID (ready or not)> (Ready info changed)
 	public void setPlayerReadyOrCancel(boolean ready) {
 		if (ready) {
 			isPlayerReady = true;
@@ -73,6 +78,7 @@ public class RoomFrame extends JFrame {
 		}
 	}
 	
+  // <Opponent ID (ready or not)>
 	public void setOpponentID(String opponentID) {
 		this.opponentID = opponentID;
 		if (isOpponentReady)
@@ -81,6 +87,7 @@ public class RoomFrame extends JFrame {
 			opponentIDLabel.setText(opponentID);
 	}
 	
+  // <Opponent ID (ready or not)> (Ready info changed)
 	public void setOpponentReadyOrCancel(boolean ready) {
 		if (ready) {
 			opponentIDLabel.setFont(new Font("Georgia", Font.BOLD, 16));
@@ -92,6 +99,7 @@ public class RoomFrame extends JFrame {
 	}
 
 	public RoomFrame() {
+    // Exit frame -> send "close" signal to the server
 		addWindowListener(new WindowAdapter() {
 			@Override
 		    public void windowClosing(WindowEvent e) {
@@ -103,45 +111,53 @@ public class RoomFrame extends JFrame {
 		setResizable(false);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 410, 550);
-		contentPane = new JPanel();
+
+		JPanel contentPane = new JPanel();
 		contentPane.setBackground(Color.WHITE);
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
 		contentPane.setLayout(null);
 
+    // <Waiting for a game>
 		JLabel roomHelpLabel = new JLabel("Waiting for a game");
 		roomHelpLabel.setFont(new Font("Georgia", Font.BOLD, 16));
 		roomHelpLabel.setHorizontalAlignment(SwingConstants.CENTER);
 		roomHelpLabel.setBounds(50, 68, 300, 30);
 		contentPane.add(roomHelpLabel);
 		
+    // <Room ID: ...>
 		roomIDLabel = new JLabel("Room ID: ");
 		roomIDLabel.setHorizontalAlignment(SwingConstants.CENTER);
 		roomIDLabel.setFont(new Font("Georgia", Font.PLAIN, 12));
 		roomIDLabel.setBounds(50, 108, 300, 30);
 		contentPane.add(roomIDLabel);
 		
+    // <Player ID (ready or not)>
 		playerIDLabel = new JLabel("playerID");
 		playerIDLabel.setHorizontalAlignment(SwingConstants.CENTER);
 		playerIDLabel.setFont(new Font("Georgia", Font.PLAIN, 16));
 		playerIDLabel.setBounds(50, 209, 300, 30);
 		contentPane.add(playerIDLabel);
 		
+    // <v.s.>
 		JLabel roomVSLabel = new JLabel("v.s.");
 		roomVSLabel.setFont(new Font("Georgia", Font.PLAIN, 12));
 		roomVSLabel.setHorizontalAlignment(SwingConstants.CENTER);
 		roomVSLabel.setBounds(50, 249, 300, 30);
 		contentPane.add(roomVSLabel);
 		
+    // <Opponent ID (ready or not)>
 		opponentIDLabel = new JLabel("opponentID");
 		opponentIDLabel.setHorizontalAlignment(SwingConstants.CENTER);
 		opponentIDLabel.setFont(new Font("Georgia", Font.PLAIN, 16));
 		opponentIDLabel.setBounds(50, 289, 300, 30);
 		contentPane.add(opponentIDLabel);
 		
+    // <Leave> button
 		JButton roomLeaveButton = new JButton("Leave");
 		roomLeaveButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+        // Click? then leave and search the rooms to join
 				Client.pendQuery("leave");
 				Client.pendQuery("search");
 			}
@@ -151,6 +167,7 @@ public class RoomFrame extends JFrame {
 		roomLeaveButton.setBounds(89, 450, 97, 23);
 		contentPane.add(roomLeaveButton);
 		
+    // <Ready> button. If already ready, then it is <Cancel>
 		roomReadyOrCancelButton = new JButton("Ready");
 		roomReadyOrCancelButton.setFont(new Font("Georgia", Font.PLAIN, 12));
 		roomReadyOrCancelButton.setBackground(Color.LIGHT_GRAY);
@@ -168,6 +185,7 @@ public class RoomFrame extends JFrame {
 		roomReadyOrCancelButton.setBounds(221, 450, 97, 23);
 		contentPane.add(roomReadyOrCancelButton);
 		
+    // Opponent is initially none.
 		setOpponentID("(Waiting)");
 		setOpponentReadyOrCancel(false);
 	}

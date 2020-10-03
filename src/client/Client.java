@@ -208,9 +208,9 @@ public class Client {
               // Invalid player name
 							sendPlayerID = false;
 							if (2 <= id.length() && id.length() <= 20)
-								playerIDFrame.playerIDErrorMsg.setText("That player ID already exists.");
+								playerIDFrame.setPlayerIDErrorMsg("That player ID already exists.");
 							else
-								playerIDFrame.playerIDErrorMsg.setText("The length should be 2<=len<=20.");
+								playerIDFrame.setPlayerIDErrorMsg("The length should be 2<=len<=20.");
 						}
 					}
 				}
