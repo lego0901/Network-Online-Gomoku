@@ -297,7 +297,7 @@ public class Client {
             // After a while (room is successfully deleted), fetch the room info
             write("search");
             repaintGUI = true;
-              }
+          }
         }
 
         // Refresh the put stone timeout indicator

@@ -202,8 +202,8 @@ public class Gomoku {
     return boardString;
   }
 
+  // A simple simulation of the game
   private static Scanner keyboard;
-
   public static void main(String[] args) {
     keyboard = new Scanner(System.in);
     Gomoku game = new Gomoku(11, 11, 50);
