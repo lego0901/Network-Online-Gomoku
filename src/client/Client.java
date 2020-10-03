@@ -17,11 +17,21 @@ import java.util.Queue;
 
 import javax.swing.JOptionPane;
 
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
 import graphics.GameFrame;
 import graphics.PlayerIDFrame;
 import graphics.RoomFrame;
 import graphics.RoomSelectFrame;
 
+import java.io.File;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
@@ -30,10 +40,6 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 
 public class Client {
-  // Server connection information
-  public final static String SERVER_HOST = "147.46.209.30";
-  public final static int SERVER_PORT = 20523;
-
   // Check if the client is connected to the server for each second
   public static final int CONNECTION_CHECK_PERIOD = 1;
   // If client is disconnected for longer than 10s, then treat it as permanent
@@ -41,8 +47,12 @@ public class Client {
   // Time sleeping right after the game is ended (5 seconds)
   public final static int WAIT_AFTER_TERMINATE = 5;
 
+  // Server connection information
+  public static String serverHost;
+  public static int serverPort;
+
   // To print log on the server program
-  public final static boolean printLog = true;
+  public static boolean printLog = true;
 
   // Reader to the client, writer from the client
   public static BufferedReader reader;
@@ -155,9 +165,25 @@ public class Client {
     gameFrame = new GameFrame();
 
     try {
+      // Read configure.xml to fetch the serverHost and Port numbeer
+      File configureXMLFile = new File("./configure.xml");
+      DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+      DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+      Document doc = dBuilder.parse(configureXMLFile);
+      doc.getDocumentElement().normalize();
+
+      NodeList serverInfo = doc.getDocumentElement().getChildNodes();
+      for (int i = 0; i < serverInfo.getLength(); i++) {
+        Node node = serverInfo.item(i);
+        if (node.getNodeName().equals("host"))
+          serverHost = node.getTextContent().strip();
+        if (node.getNodeName().equals("port"))
+          serverPort = Integer.parseInt(node.getTextContent());
+      }
+
       // Connect to the server
       socket = new Socket();
-      socket.connect(new InetSocketAddress(SERVER_HOST, SERVER_PORT));
+      socket.connect(new InetSocketAddress(serverHost, serverPort));
 
       reader = new BufferedReader(new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_8));
       writer = new PrintWriter(new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_8));
@@ -309,6 +335,12 @@ public class Client {
       }
     } catch (IOException ioex) {
       ioex.printStackTrace();
+      System.exit(0);
+		} catch (ParserConfigurationException pce) {
+			pce.printStackTrace();
+      System.exit(0);
+		} catch (SAXException se) {
+			se.printStackTrace();
       System.exit(0);
     } catch (InterruptedException iex) {
       try {

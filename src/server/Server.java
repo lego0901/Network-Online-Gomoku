@@ -8,12 +8,23 @@ package server;
 
 import java.net.Socket;
 import java.util.LinkedList;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
+import java.io.File;
 import java.io.IOException;
 import java.net.ServerSocket;
 
 public class Server {
   // Server port number
-  public final static int SERVER_PORT = 20523;
+  public static int serverPort;
 
   // To print log on the server program
   public static boolean printLog = true;
@@ -149,8 +160,23 @@ public class Server {
     rooms = new LinkedList<Room>();
 
     try {
-      serverSocket = new ServerSocket(SERVER_PORT);
-      System.out.println("Bind to port " + SERVER_PORT + " success");
+      // Read configure.xml to fetch the serverPort numbeer
+      File configureXMLFile = new File("./configure.xml");
+      DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+      DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+      Document doc = dBuilder.parse(configureXMLFile);
+      doc.getDocumentElement().normalize();
+
+      NodeList serverInfo = doc.getDocumentElement().getChildNodes();
+      for (int i = 0; i < serverInfo.getLength(); i++) {
+        Node node = serverInfo.item(i);
+        if (node.getNodeName().equals("port"))
+          serverPort = Integer.parseInt(node.getTextContent());
+      }
+
+      // Bind server
+      serverSocket = new ServerSocket(serverPort);
+      System.out.println("Bind to port " + serverPort + " success");
 
       while (true) {
         Socket socket = serverSocket.accept();
@@ -163,6 +189,10 @@ public class Server {
       }
     } catch (IOException ioex) {
       ioex.printStackTrace();
+		} catch (ParserConfigurationException pce) {
+			pce.printStackTrace();
+		} catch (SAXException se) {
+			se.printStackTrace();
     } finally {
       try {
         if (serverSocket != null && !serverSocket.isClosed()) {
