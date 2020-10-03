@@ -5,6 +5,7 @@
  * GUI in game.
  *
  * <Game info (your turn, you win, ..)>
+ * <Player Color>      <Opponent Color>
  * <Player ID>            <Opponent ID>
  *      <Put stone remaining time>
  *          ---------------
@@ -95,6 +96,8 @@ public class GameFrame extends JFrame {
   private JLabel gameHelpLabel;
   private JLabel playerIDLabel;
   private JLabel opponentIDLabel;
+  private JLabel playerColorLabel;
+  private JLabel opponentColorLabel;
   private JLabel putStoneErrorMsg;
   private JLabel timerLabel;
 
@@ -193,13 +196,21 @@ public class GameFrame extends JFrame {
   }
 
   // Setting the player's ID
-  public void setPlayerID(String playerID) {
+  public void setPlayerID(String playerID, int playerTurn) {
     playerIDLabel.setText(playerID);
+    if (playerTurn == 1)
+      playerColorLabel.setText("black");
+    else
+      playerColorLabel.setText("white");
   }
 
   // Setting the opponent's ID
-  public void setOpponentID(String opponentID) {
+  public void setOpponentID(String opponentID, int opponentTurn) {
     opponentIDLabel.setText(opponentID);
+    if (opponentTurn == 1)
+      opponentColorLabel.setText("black");
+    else
+      opponentColorLabel.setText("white");
   }
 
   // Set it is player's turn
@@ -292,6 +303,19 @@ public class GameFrame extends JFrame {
     opponentIDLabel.setFont(new Font("Georgia", Font.PLAIN, 16));
     opponentIDLabel.setBounds(252, 67, 140, 30);
     contentPane.add(opponentIDLabel);
+
+    // Player and Opponent Color field
+    playerColorLabel = new JLabel("");
+    playerColorLabel.setHorizontalAlignment(SwingConstants.CENTER);
+    playerColorLabel.setFont(new Font("Georgia", Font.PLAIN, 10));
+    playerColorLabel.setBounds(12, 52, 140, 30);
+    contentPane.add(playerColorLabel);
+
+    opponentColorLabel = new JLabel("");
+    opponentColorLabel.setHorizontalAlignment(SwingConstants.CENTER);
+    opponentColorLabel.setFont(new Font("Georgia", Font.PLAIN, 10));
+    opponentColorLabel.setBounds(252, 52, 140, 30);
+    contentPane.add(opponentColorLabel);
 
     // Put stone countdown field
     timerLabel = new JLabel("60");

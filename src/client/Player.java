@@ -324,8 +324,8 @@ public class Player {
 
             // GUI repaint
             Client.gameFrame.synchronizeBoard(Client.gameBoard);
-            Client.gameFrame.setPlayerID(id);
-            Client.gameFrame.setOpponentID(Opponent.id);
+            Client.gameFrame.setPlayerID(id, turnID);
+            Client.gameFrame.setOpponentID(Opponent.id, Opponent.turnID);
             Client.gameFrame.setTimer();
             Client.gameFrame.setPutStoneErrorMsg("");
             break;
