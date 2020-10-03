@@ -256,10 +256,10 @@ public class ServerThread extends Thread {
 						switch (inputState) {
 						case DEFAULT:
 							if (query.equals("create")) {
-                // Available query string: "create\nroomID"
+                // Available query string: "create\n{roomID}"
 								inputState = InputState.CREATE;
 							} else if (query.equals("join")) {
-                // Available query string: "join\nroomID"
+                // Available query string: "join\n{roomID}"
 								inputState = InputState.JOIN;
 							} else if (query.equals("search")) {
                 // If the client want to know about the rooms information,
@@ -539,6 +539,7 @@ public class ServerThread extends Thread {
 							}
 						}
 						break;
+
 					default:
 						break;
 					}
