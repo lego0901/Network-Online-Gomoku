@@ -17,8 +17,6 @@
  */
 package graphics;
 
-import java.awt.EventQueue;
-
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
@@ -119,7 +117,7 @@ public class RoomSelectFrame extends JFrame {
     roomIDHelpLabel.setBounds(50, 32, 300, 30);
     contentPane.add(roomIDHelpLabel);
 
-    //  <Existing rooms list>
+    // <Existing rooms list>
     JLabel roomSearchHelpLabel = new JLabel("Existing rooms lists");
     roomSearchHelpLabel.setFont(new Font("Georgia", Font.PLAIN, 12));
     roomSearchHelpLabel.setHorizontalAlignment(SwingConstants.CENTER);
@@ -167,7 +165,7 @@ public class RoomSelectFrame extends JFrame {
     roomJoinButton.setFont(new Font("Georgia", Font.PLAIN, 12));
     roomJoinButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        // "join\n{roomID}" query to the server
+        // "join\n{roomid}" query to the server
         Client.pendQuery("join");
         Client.pendQuery(roomIDTextField.getText());
       }

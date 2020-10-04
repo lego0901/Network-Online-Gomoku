@@ -114,6 +114,8 @@ public class Player {
               Client.write("leave");
               state = State.SEARCH_ROOM;
               inputState = InputState.OUT_ROOM;
+              Opponent.state = Opponent.State.NONE;
+              Opponent.inputState = Opponent.InputState.NONE;
             } else {
               // invalid query
             }
@@ -136,6 +138,8 @@ public class Player {
               Client.write("leave");
               state = State.SEARCH_ROOM;
               inputState = InputState.OUT_ROOM;
+              Opponent.state = Opponent.State.NONE;
+              Opponent.inputState = Opponent.InputState.NONE;
             } else {
               // invalid query
             }
@@ -192,6 +196,8 @@ public class Player {
           Client.write("leave");
           state = State.SEARCH_ROOM;
           inputState = InputState.OUT_ROOM;
+          Opponent.state = Opponent.State.NONE;
+          Opponent.inputState = Opponent.InputState.NONE;
         }
         break;
 
@@ -214,6 +220,12 @@ public class Player {
       // SEARCH_ROOM: Right after the player is logged on
       case SEARCH_ROOM:
         switch (inputState) {
+          case OUT_ROOM:
+            if (response.equals("change")) {
+              // The room information is changed -> research server
+              Client.pendQuery("search");
+            }
+            break;
           case CREATE_ROOM:
           case JOIN_ROOM:
             // after "create\n{roomID}" or "join\n{roomID}" is queried
