@@ -45,6 +45,9 @@ public class ServerThread extends Thread {
   // ServerThread's current input state
   InputState inputState = InputState.DEFAULT;
 
+  // To synchronize roomInfoVersion with Server
+  int roomInfoVersion;
+
   // To estimate the idle time
   LocalDateTime lastQueryTime;
   // Last time that connection check signal received from the client
@@ -472,6 +475,14 @@ public class ServerThread extends Thread {
         } else {
           // Polling processes
           switch (player.state) {
+            // SEARCH_ROOM: Right after the player is logged on
+            case SEARCH_ROOM:
+              // Room information is changed
+              if (inputState == InputState.DEFAULT && Server.roomInfoVersion != roomInfoVersion) {
+                roomInfoVersion = Server.roomInfoVersion;
+                write("change");
+              }
+
             // READY_ROOM: The player is ready in the room
             case READY_ROOM:
               if (player.isMyRoomReady()) {
@@ -487,7 +498,7 @@ public class ServerThread extends Thread {
               }
               break;
 
-              // MY_TURN: The player is in a game, and it is his turn
+            // MY_TURN: The player is in a game, and it is his turn
             case MY_TURN:
               if (!player.isMyTurn()) {
                 // If game's turn is changed (by the opponentThread), then change the state
@@ -515,7 +526,7 @@ public class ServerThread extends Thread {
               }
               break;
 
-              // NOT_MY_TURN: The player is in a game, but it is not his turn
+            // NOT_MY_TURN: The player is in a game, but it is not his turn
             case NOT_MY_TURN:
               // Client is allowed to be idle during this state
               setQueryTimer();

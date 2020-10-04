@@ -1,6 +1,6 @@
 JAVA_COMPILE=javac
+JAVA_OPT=-d ./bin -encoding UTF-8
 JAVA_RUN=java
-#JAVA_VERSION=$(shell java -version | grep :
 
 JAVA_SRC=$(wildcard src/*.java src/*/*.java)
 
@@ -17,7 +17,7 @@ help:
 	@echo make all: compile and make executable server.jar and client.jar
 
 compile:
-	$(JAVA_COMPILE) -d ./bin -encoding UTF-8 $(JAVA_SRC)
+	$(JAVA_COMPILE) $(JAVA_OPT) $(JAVA_SRC)
 
 server: compile
 	@echo "Manifest-Version: 1.0" > $(MANIFEST)
