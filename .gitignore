@@ -5,3 +5,9 @@ server.jar
 client.jar
 proxy-reader.jar
 proxy-writer.jar
+document/*.aux
+document/*.fls
+document/*.out
+document/*.synctex.gz
+document/*.fdb_latexmk
+document/*.log

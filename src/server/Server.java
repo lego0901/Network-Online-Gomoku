@@ -37,6 +37,9 @@ public class Server {
   public static LinkedList<Room> rooms;
   public static LinkedList<ServerThread> threads;
 
+  // To know whether room information is changed from ServerThread
+  public static int roomInfoVersion = 0;
+
   // Add new player if possible
   public static boolean addPlayer(String playerID, ServerThread thread) {
     if (!Player.isValidPlayerID(playerID))
@@ -61,6 +64,7 @@ public class Server {
           return false; // no duplicate allowed
       }
       rooms.add(new Room(roomID));
+      roomInfoVersion++;
       return true;
     }
   }
@@ -109,7 +113,9 @@ public class Server {
           break;
         }
       }
-      players.remove(idx);
+      if (idx == -1) {
+        players.remove(idx);
+      }
     }
   }
 
@@ -123,7 +129,10 @@ public class Server {
           break;
         }
       }
-      rooms.remove(idx);
+      if (idx != -1) {
+        roomInfoVersion++;
+        rooms.remove(idx);
+      }
     }
   }
 

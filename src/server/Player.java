@@ -53,6 +53,8 @@ public class Player {
       // Existing name and room is not full => OK
       state = PlayerState.ENTER_ROOM;
       room.addPlayer(this);
+      // Make clients to refresh the search result
+      Server.roomInfoVersion++;
       return true;
     }
     return false;
@@ -70,6 +72,8 @@ public class Player {
         // If there is nobody in that room, then erase it
         Server.eraseRoom(room.id);
       }
+      // Make clients to refresh the search result
+      Server.roomInfoVersion++;
     }
     state = PlayerState.SEARCH_ROOM;
     room = null;
