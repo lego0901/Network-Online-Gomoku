@@ -19,6 +19,8 @@
  */
 package graphics;
 
+import java.awt.EventQueue;
+
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
@@ -249,11 +251,9 @@ public class GameFrame extends JFrame {
   public void setPlayerWin() {
     gameHelpLabel.setText("You Win");
   }
-
   public void setPlayerLose() {
     gameHelpLabel.setText("You Lose");
   }
-
   public void setPlayerDraw() {
     gameHelpLabel.setText("Draw");
   }

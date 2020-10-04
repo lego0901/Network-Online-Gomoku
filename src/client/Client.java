@@ -336,10 +336,10 @@ public class Client {
     } catch (IOException ioex) {
       ioex.printStackTrace();
       System.exit(0);
-    } catch (ParserConfigurationException pce) {
+		} catch (ParserConfigurationException pce) {
 			pce.printStackTrace();
       System.exit(0);
-    } catch (SAXException se) {
+		} catch (SAXException se) {
 			se.printStackTrace();
       System.exit(0);
     } catch (InterruptedException iex) {
