@@ -327,9 +327,9 @@ success
   \begin{itemize}
     \item 게임 방 탐색 상태
     \begin{itemize}
-      \item \texttt{WAIT\_ROOM}: 플레이어가 한 명 밖에 없는 상태 \textbf{(available)}
+      \item \texttt{WAIT\_ROOM}: 플레이어가 한 명 밖에 없는 상태 \textbf{\color{red}(available)}
       \item \texttt{FULL\_ROOM}: 플레이어가 두 명 있지만 게임 대기 중인 상태
-      \item \texttt{PLAYING}: 플레이어가 두 명이서 게임 중인 상태 \textbf{(playing)}
+      \item \texttt{PLAYING}: 플레이어가 두 명이서 게임 중인 상태 \textbf{\color{red}(playing)}
     \end{itemize}
   \end{itemize}
   \item 상대 플레이어 정보로 가지는 상태 (클라이언트에서만 관리함)
@@ -631,7 +631,9 @@ src
     \item \texttt{void addPlayer(Player player)}: 플레이어를 방에 입장시킨다.
     \item \texttt{void removePlayer(Player player)}: 플레이어를 방에서 추방시킨다.
     \item \texttt{boolean isDestructable()}: 방에 플레이어가 아무도 없어 제거할 수 있는지 반환한다.
-    \item \texttt{void setTurnsOfPlayers()}: 게임 시작 직전 선수와 후수를 지정한다.
+    \item \texttt{void setTurnsOfPlayers()}: 게임 시작 직전 선수와 후수를 지정한다. 각 방은 플레이어들을
+    하나의 ArrayList로 관리하는데, 먼저 방에 접속한 플레이어가 첫 번째 인덱스로 들어가기 때문에 {\color{red} owner ID}가
+    잘 정의되며, 그를 항상 선수로 둔다.
     \item \texttt{void initializeGame()}: 오목 보드를 초기화하고, 방 상태를 갱신한다.
     \item \texttt{boolean putStone(int row, int column)}: 해당 위치에 돌을 놓는다.
     \item \texttt{void setWinner(String playerID), void setLoser(String playerID)}: 게임의 최종 상태를 결정한다.
