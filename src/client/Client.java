@@ -317,11 +317,6 @@ public class Client {
             Player.inputState = Player.InputState.SEARCH_ROOM;
             Opponent.state = Opponent.State.NONE;
             Opponent.inputState = Opponent.InputState.NONE;
-            // And leave the room
-            write("leave");
-            Thread.sleep(100);
-            // After a while (room is successfully deleted), fetch the room info
-            write("search");
             repaintGUI = true;
           }
         }

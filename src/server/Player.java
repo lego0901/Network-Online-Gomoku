@@ -46,6 +46,20 @@ public class Player {
   }
 
   // Methods BEFORE playing game
+  // Player create and enter the room name roomID if possible
+  public boolean createAndEnterRoom(String roomID) {
+    if (Server.addRoom(roomID)) {
+      // If successfully created a room, then enter that
+      room = Server.fetchRoom(roomID);
+      state = PlayerState.ENTER_ROOM;
+      room.addPlayer(this);
+      // Make clients to refresh the search result
+      Server.roomInfoVersion++;
+      return true;
+    }
+    return false;
+  }
+
   // Player enter the room name roomID if possible
   public boolean enterRoom(String roomID) {
     room = Server.fetchRoom(roomID);

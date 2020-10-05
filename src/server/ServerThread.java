@@ -301,13 +301,19 @@ public class ServerThread extends Thread {
                   // Available query string: "create\nroomID". "roomID" part
                   String roomCreateID = query;
                   inputState = InputState.DEFAULT;
-                  if (Server.addRoom(roomCreateID)) {
-                    // Valid and not a duplicate; Create and enter that room
-                    player.enterRoom(roomCreateID);
-                    debug("Player " + player.id + " created and joined the room " + roomCreateID);
-                    write("success");
+                  if (Server.fetchRoom(roomCreateID) == null) {
+                    // If there is no duplicated room ID
+                    if (player.createAndEnterRoom(roomCreateID)) {
+                      // Valid and not a duplicate; Create and enter that room
+                      debug("Player " + player.id + " created and joined the room " + roomCreateID);
+                      write("success");
+                    } else {
+                      // Invalid room
+                      debug("Room " + roomCreateID + " is invalid");
+                      write("fail");
+                    }
                   } else {
-                    // Invalid or a duplicate
+                    // Duplicated
                     debug("Room " + roomCreateID + " is duplicated");
                     write("fail");
                   }
