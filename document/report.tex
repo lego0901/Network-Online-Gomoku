@@ -154,6 +154,13 @@ Leave 버튼을 누르면 방을 나가서 다시 Figure \ref{fig:room_search} �
 \end{figure}
 
 \section{Details of Implementation}
+\subsection{Development Environment}
+우선 Java 오라클 JDK 15 버전이 설치되어있는 윈도우 PC에서 Eclipse IDE
+개발환경을 가지고 기본적인 코드를 작성하였다. 그런 뒤, OpenJDK 11 버전이
+설치된 리눅스 서버 PC의 Vim 환경에서 디버깅 및 코드 클리닝을 마쳤다.
+배포의 편의성을 위해 별도의 외부 라이브러리는 사용하지 않고, pure JAVA로만
+개발하였다.
+
 \subsection{Protocol}
 서버는 비동기(asynchronous)적으로 여러 클라이언트 처리 쓰레드를 관리하도록
 만들었다. 메인 서버는 그저 bind 및 accept만 진행하고, 새로운 소켓 연결이
@@ -291,7 +298,6 @@ success
     \item \texttt{opponent leave}: 상대가 방에서 나갔음을 알려준다. (이 경우 플레이어는 게임에 승리한다.)
   \end{itemize}
 \end{itemize}
-\newpage
 
 \subsection{Finite State Machine}
 \subsubsection{State of Player, Room and Opponent}
