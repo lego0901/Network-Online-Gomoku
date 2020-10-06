@@ -100,7 +100,7 @@ public class Client {
   }
 
   // Send a string to the server and flush
-  static void write(String str) {
+  public static void write(String str) {
     writer.println(str);
     writer.flush();
   }

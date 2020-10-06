@@ -103,7 +103,7 @@ public class RoomFrame extends JFrame {
       @Override
       public void windowClosing(WindowEvent e) {
         Player.state = Player.State.EXIT;
-        Client.pendQuery("close");
+        Client.write("close");
       }
     });
     setModalExclusionType(ModalExclusionType.APPLICATION_EXCLUDE);
