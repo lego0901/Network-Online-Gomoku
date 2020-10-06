@@ -18,6 +18,7 @@ import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
 import client.Client;
+import client.Player;
 
 import java.awt.Color;
 import javax.swing.JLabel;
@@ -101,6 +102,7 @@ public class RoomFrame extends JFrame {
     addWindowListener(new WindowAdapter() {
       @Override
       public void windowClosing(WindowEvent e) {
+        Player.state = Player.State.EXIT;
         Client.pendQuery("close");
       }
     });

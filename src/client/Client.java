@@ -198,7 +198,7 @@ public class Client {
 
       boolean sendPlayerID = false;
       String id = "";
-      while (true) {
+      while (Player.state != Player.State.EXIT) {
         if (isQueryPended()) {
           String query = nextQuery();
 
@@ -207,7 +207,7 @@ public class Client {
           //
           // "player"
           // "{playerID}"
-          if (!sendPlayerID) {
+          if (!sendPlayerID && Player.state != Player.State.EXIT) {
             sendPlayerID = true;
             id = query;
             write("player");
@@ -316,7 +316,8 @@ public class Client {
             Player.state = Player.State.ENTER_ROOM;
             Player.inputState = Player.InputState.IN_ROOM;
             if (Opponent.state != Opponent.State.NONE) {
-              Opponent.state = Opponent.State.ENTER_ROOM;
+              if (Opponent.state != Opponent.State.READY_ROOM)
+                Opponent.state = Opponent.State.ENTER_ROOM;
               Opponent.inputState = Opponent.InputState.IN_ROOM;
             }
             repaintGUI = true;

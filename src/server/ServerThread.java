@@ -178,7 +178,6 @@ public class ServerThread extends Thread {
               if (query.equals("close")) {
                 // Close connection
                 closeConnection = true;
-                break;
               } else if (query.equals("player")) {
                 // For example, "player\nwoosung" can be queried
                 // If the current string is "player", then the next string is playerID

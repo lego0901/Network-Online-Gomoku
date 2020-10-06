@@ -12,12 +12,12 @@ import javax.swing.JOptionPane;
 
 public class Player {
   // Player's action states
-  static enum State {
+  public static enum State {
     SEARCH_ROOM, ENTER_ROOM, READY_ROOM, MY_TURN, NOT_MY_TURN, TERMINATED, EXIT
   }
 
   // Query pending state for the client
-  static enum InputState {
+  public static enum InputState {
     OUT_ROOM, CREATE_ROOM, JOIN_ROOM, SEARCH_ROOM, IN_ROOM, BEFORE_GAME, IN_GAME, STONE_GAME, INVALID_MOVE, END_GAME
   }
 
