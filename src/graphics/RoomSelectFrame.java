@@ -22,6 +22,7 @@ import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
 import client.Client;
+import client.Player;
 
 import java.awt.Color;
 import javax.swing.JLabel;
@@ -95,7 +96,8 @@ public class RoomSelectFrame extends JFrame {
     addWindowListener(new WindowAdapter() {
       @Override
       public void windowClosing(WindowEvent e) {
-        Client.pendQuery("close");
+        Player.state = Player.State.EXIT;
+        Client.write("close");
       }
     });
     setModalExclusionType(ModalExclusionType.APPLICATION_EXCLUDE);

@@ -100,7 +100,7 @@ public class Client {
   }
 
   // Send a string to the server and flush
-  static void write(String str) {
+  public static void write(String str) {
     writer.println(str);
     writer.flush();
   }
@@ -198,7 +198,7 @@ public class Client {
 
       boolean sendPlayerID = false;
       String id = "";
-      while (true) {
+      while (Player.state != Player.State.EXIT) {
         if (isQueryPended()) {
           String query = nextQuery();
 
@@ -207,7 +207,7 @@ public class Client {
           //
           // "player"
           // "{playerID}"
-          if (!sendPlayerID) {
+          if (!sendPlayerID && Player.state != Player.State.EXIT) {
             sendPlayerID = true;
             id = query;
             write("player");
@@ -313,15 +313,13 @@ public class Client {
           if (Duration.between(Player.terminateTime, LocalDateTime.now())
               .getSeconds() >= WAIT_AFTER_TERMINATE) {
             // Go back to the room
-            Player.state = Player.State.SEARCH_ROOM;
-            Player.inputState = Player.InputState.SEARCH_ROOM;
-            Opponent.state = Opponent.State.NONE;
-            Opponent.inputState = Opponent.InputState.NONE;
-            // And leave the room
-            write("leave");
-            Thread.sleep(100);
-            // After a while (room is successfully deleted), fetch the room info
-            write("search");
+            Player.state = Player.State.ENTER_ROOM;
+            Player.inputState = Player.InputState.IN_ROOM;
+            if (Opponent.state != Opponent.State.NONE) {
+              if (Opponent.state != Opponent.State.READY_ROOM)
+                Opponent.state = Opponent.State.ENTER_ROOM;
+              Opponent.inputState = Opponent.InputState.IN_ROOM;
+            }
             repaintGUI = true;
           }
         }

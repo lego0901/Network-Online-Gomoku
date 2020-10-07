@@ -8,6 +8,7 @@
 \usepackage{lipsum}
 \usepackage{kotex}
 \usepackage{subcaption}
+\usepackage{xcolor}
 
 \setlist[itemize]{noitemsep}
 \setlist[enumerate]{noitemsep}
@@ -39,8 +40,8 @@
 인터넷 연결이 10초 이상 끊어진 경우 플레이어는 승리한다. 만약 돌을 놓는 시간
 제한을 놓치거나, 보드 밖에 돌을 2번 이상 둘 경우 곧바로 패배한다. 두 플레이어가
 보드에 놓은 돌의 총 개수가 50개 이상인 경우 무승부로 간주한다. 게임의 승자
-상태가 결정되는 순간 결과 화면은 5초 동안 보여지며, 이후 방은 없어지고
-두 플레이어는 다시 새로운 방을 찾는 화면으로 돌아간다.
+상태가 결정되는 순간 결과 화면은 5초 동안 보여지며, 이후 두 플레이어는
+게임 대기 방 화면으로 돌아간다.
 
 \section{User Manual}
 \subsection{Compilation \& Execution}
@@ -128,8 +129,7 @@ Leave 버튼을 누르면 방을 나가서 다시 Figure \ref{fig:room_search} �
 색깔도 굵게 표시된다. 각 차례마다 플레이어에게 남은 고민할 시간이 중앙에
 초단위로 실시간으로 표시된다. 중복된 위치에 돌을 놓거나, 보드 밖에 돌을
 놓는 경우 붉은 색으로 경고 문구가 드러난다. 한 플레이어가 연속된 5개의
-돌을 놓으면 승리 화면이 5초 동안 나온다. 그런 뒤 게임에서 나와 다시 방을 검색하는
-화면으로 되돌아간다.
+돌을 놓으면 승리 화면이 5초 동안 나온다. 그런 뒤 다시 대기 방 화면으로 돌아간다.
 \begin{figure}[h]
   \centering
   \begin{subfigure}{.3\textwidth}
@@ -154,6 +154,13 @@ Leave 버튼을 누르면 방을 나가서 다시 Figure \ref{fig:room_search} �
 \end{figure}
 
 \section{Details of Implementation}
+\subsection{Development Environment}
+우선 Java 오라클 JDK 15 버전이 설치되어있는 윈도우 PC에서 Eclipse IDE
+개발환경을 가지고 기본적인 코드를 작성하였다. 그런 뒤, OpenJDK 11 버전이
+설치된 리눅스 서버 PC의 Vim 환경에서 디버깅 및 코드 클리닝을 마쳤다.
+배포의 편의성을 위해 별도의 외부 라이브러리는 사용하지 않고, pure JAVA로만
+개발하였다.
+
 \subsection{Protocol}
 서버는 비동기(asynchronous)적으로 여러 클라이언트 처리 쓰레드를 관리하도록
 만들었다. 메인 서버는 그저 bind 및 accept만 진행하고, 새로운 소켓 연결이
@@ -291,10 +298,59 @@ success
     \item \texttt{opponent leave}: 상대가 방에서 나갔음을 알려준다. (이 경우 플레이어는 게임에 승리한다.)
   \end{itemize}
 \end{itemize}
-\newpage
 
 \subsection{Finite State Machine}
-서버와 클라이언트가 주고받는 신호는 비동기적이다. 그러므로 모든 종류의 신호들이
+\subsubsection{State of Player, Room and Opponent}
+서버와 클라이언트는 각각 특정한 상태를 가진다. 이에 따라 서로 다른 질의와 응답 과정을
+거치게 된다.
+\begin{itemize}
+  \item 플레이어가 가지는 상태 (로그인 이전에는 상태가 없음)
+  \begin{itemize}
+    \item 게임 방 탐색 상태
+    \begin{itemize}
+      \item \texttt{SEARCH\_ROOM}: 방을 검색하여 찾고 있는 상태
+    \end{itemize}
+    \item 게임 방 내부 상태
+    \begin{itemize}
+      \item \texttt{ENTER\_ROOM}: 방에 막 들어온 상태거나, 준비가 되지 않은 상태
+      \item \texttt{READY\_ROOM}: 방에서 준비를 마친 상태
+    \end{itemize}
+    \item 게임 플레이 상태
+    \begin{itemize}
+      \item \texttt{MY\_TURN}: 내 플레이어가 돌을 놓을 수 있는 상태
+      \item \texttt{NOT\_MY\_TURN}: 상대가 돌을 놓을 수 있는 상태
+      \item (클라이언트만 있는 상태) \texttt{TERMINATED}: 게임이 끝나고 5초간 보여지는 상태
+    \end{itemize}
+    \item (클라이언트만 있는 상태) \texttt{EXIT}: 게임 프로그램을 창을 닫은 상태 (close 질의 대기)
+  \end{itemize}
+  \item 방이 가지는 상태 (서버에서만 관리함)
+  \begin{itemize}
+    \item 게임 방 탐색 상태
+    \begin{itemize}
+      \item \texttt{WAIT\_ROOM}: 플레이어가 한 명 밖에 없는 상태 \textbf{\color{red}(available)}
+      \item \texttt{FULL\_ROOM}: 플레이어가 두 명 있지만 게임 대기 중인 상태
+      \item \texttt{PLAYING}: 플레이어가 두 명이서 게임 중인 상태 \textbf{\color{red}(playing)}
+    \end{itemize}
+  \end{itemize}
+  \item 상대 플레이어 정보로 가지는 상태 (클라이언트에서만 관리함)
+  \begin{itemize}
+    \item \texttt{NONE}: 아직 상대 플레이어가 없는 상태
+    \item 게임 방 내부 상태
+    \begin{itemize}
+      \item \texttt{ENTER\_ROOM}: 방에 막 들어온 상태거나, 준비가 되지 않은 상태
+      \item \texttt{READY\_ROOM}: 방에서 준비를 마친 상태
+    \end{itemize}
+    \item 게임 플레이 상태
+    \begin{itemize}
+      \item \texttt{MY\_TURN}: 상대 플레이어가 돌을 놓을 수 있는 상태
+      \item \texttt{NOT\_MY\_TURN}: 내 플레이어가 돌을 놓을 수 있는 상태
+      \item \texttt{TERMINATED}: 게임이 끝나고 5초간 보여지는 상태
+    \end{itemize}
+  \end{itemize}
+\end{itemize}
+
+\subsubsection{Input State}
+또한 서버와 클라이언트가 주고받는 신호는 비동기적이다. 그러므로 모든 종류의 신호들이
 교차하여 들어올 수 있음을 염두해야한다. 예를 들어, \texttt{search} 질의에
 응답하는 와중에 갑자기 \texttt{connection check} 신호를 보내야할 수도 있고,
 플레이어 신호를 보내는 중에 상대 신호를 보내야할 수도 있다. 이런 경우를 제대로
@@ -376,6 +432,7 @@ src
        ├── Player.java
        └── Room.java
 \end{Verbatim}
+아래 부분에서 필수 메소드는 {\color{red} 붉은 색 글씨}로 표기하여 강조하겠다.
 
 \subsubsection{Client Package (\texttt{client})}
 클라이언트 실행부이다. 클라이언트는 따로 쓰레드를 관리할 필요가 없으므로
@@ -522,7 +579,7 @@ src
     서버를 bind시키고, 계속 listen하면서 새로운 클라이언트가 연결되면 ServerThread 하나를
     생성하여 처리하게 시킨다. 존재하는 모든 쓰레드(ServerThread), 플레이어(Player), 방(Room)
     정보를 ArrayList 자료구조로 저장시켜 추가, 검색, 삭제가 용이하게 하였다.
-    \item \texttt{static boolean addPlayer(String playerID), static boolean addRoom(String roomID), static void addThread(ServerThread thread)}:
+    \item \texttt{static boolean addPlayer(String playerID), {static boolean addRoom(String roomID)}, static void addThread(ServerThread thread)}:
     새로운 플레이어, 방, 쓰레드를 추가한다. 추가가 불가능하면 거짓 값을 반환한다.
     \item \texttt{static Player fetchPlayer(String playerID), static Room fetchRoom(String roomID), static void fetchThread(String playerID)}:
     플레이어, 방, 쓰레드를 검색한다. 존재하지 않는 값이면 null을 반환한다.
@@ -547,16 +604,18 @@ src
   \begin{itemize}
     \item[] 각 클라이언트의 플레이어 정보와 상태를 저장하는 저장소이다.
     \item \texttt{static boolean isValidPlayerID(String id)}: 2자 이상, 20자 이하 문자열인지 확인한다.
-    \item \texttt{boolean enterRoom(String roomID)}: 해당 방으로 입장하는 함수이다.
-    \item \texttt{void leaveRoom()}: 원래 있던 방에서 나가는 함수이다.
+    \item \texttt{\color{red} boolean createAndEnterRoom(String roomID)}: 해당 방을 생성하고 입장하는 함수이다.
+    \item \texttt{\color{red} boolean enterRoom(String roomID)}: 해당 방으로 입장하는 함수이다.
+    \item \texttt{\color{red} void leaveRoom()}: 원래 있던 방에서 나가는 함수이다.
     \item \texttt{String opponentID()}: 상대 ID를 가져오는 함수이다.
-    \item \texttt{void ready(), void cancel()}: 게임 대기 방에서 준비 및 취소하는 함수이다.
+    \item \texttt{\color{red} void ready(), void cancel()}: 게임 대기 방에서 준비 및 취소하는 함수이다.
     \item \texttt{boolean isReadyOrPlaying()}: 본 플레이어가 준비 중이거나, 게임 플레이 중인지 확인하는 함수이다.
     한 방에 있는 모든 플레이어가 동시에 ready에서 playing 상태로 전환하지 않으므로, 이 함수로부터 게임 시작 가능성을
     체크하는 것이 합리적이다.
     \item \texttt{boolean isMyRoomReady()}: 내 방의 모든 플레이어가 준비 완료인지 반환한다.
     \item \texttt{void initializeGame()}: 오목 보드를 초기화하고, 플레이어의 상태를 갱신한다.
-    \item \texttt{boolean putStone(int row, int column)}: 해당 위치에 돌을 놓는다.
+    \item \texttt{\color{red} boolean putStone(int row, int column)}: 해당 위치에 돌을 놓는다. 해당 플레이어의
+    게임 방 ID는 이미 고정된 상황이므로 PPT 슬라이드처럼 인자로 넣지 않았다.
     \item \texttt{String putStoneErrorMsg()}: 돌을 놓는데 실패했을 때, 그 이유를 가져온다.
     \item \texttt{void setWinner(), void setLoser(), void setDraw()}: 게임의 최종 상태를 결정한다.
     \item \texttt{void setTimer()}: 돌 놓기 60초 제한 시간의 기준점을 지금으로 설정한다.
@@ -572,7 +631,9 @@ src
     \item \texttt{void addPlayer(Player player)}: 플레이어를 방에 입장시킨다.
     \item \texttt{void removePlayer(Player player)}: 플레이어를 방에서 추방시킨다.
     \item \texttt{boolean isDestructable()}: 방에 플레이어가 아무도 없어 제거할 수 있는지 반환한다.
-    \item \texttt{void setTurnsOfPlayers()}: 게임 시작 직전 선수와 후수를 지정한다.
+    \item \texttt{void setTurnsOfPlayers()}: 게임 시작 직전 선수와 후수를 지정한다. 각 방은 플레이어들을
+    하나의 ArrayList로 관리하는데, 먼저 방에 접속한 플레이어가 첫 번째 인덱스로 들어가기 때문에 {\color{red} owner ID}가
+    잘 정의되며, 그를 항상 선수로 둔다.
     \item \texttt{void initializeGame()}: 오목 보드를 초기화하고, 방 상태를 갱신한다.
     \item \texttt{boolean putStone(int row, int column)}: 해당 위치에 돌을 놓는다.
     \item \texttt{void setWinner(String playerID), void setLoser(String playerID)}: 게임의 최종 상태를 결정한다.

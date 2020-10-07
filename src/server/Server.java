@@ -113,7 +113,7 @@ public class Server {
           break;
         }
       }
-      if (idx == -1) {
+      if (idx != -1) {
         players.remove(idx);
       }
     }
