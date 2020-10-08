@@ -170,6 +170,7 @@ public class RoomSelectFrame extends JFrame {
         // "join\n{roomid}" query to the server
         Client.pendQuery("join");
         Client.pendQuery(roomIDTextField.getText());
+        Client.roomFrame.setOwnerID("");
       }
     });
     roomJoinButton.setBounds(159, 450, 97, 23);
@@ -184,6 +185,7 @@ public class RoomSelectFrame extends JFrame {
         // "create\n{roomID}" query to the server
         Client.pendQuery("create");
         Client.pendQuery(roomIDTextField.getText());
+        Client.roomFrame.setOwnerID(Player.id);
       }
     });
     roomCreateButton.setBounds(268, 450, 97, 23);

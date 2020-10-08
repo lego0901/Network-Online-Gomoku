@@ -6,6 +6,7 @@
  *
  *       <Waiting for a game>
  *          <Room ID: ...>
+ *          <Owner ID: ...>
  *    <Player ID (ready or not)>
  *              <v.s.>
  *   <Opponent ID (ready or not)>
@@ -36,14 +37,17 @@ public class RoomFrame extends JFrame {
   private static final long serialVersionUID = 1L;
 
   // Player and opponent ID info
-  private String playerID;
-  private String opponentID;
+  private String playerID = "";
+  private String opponentID = "";
+  // Owner: who came to first
+  private String ownerID = "";
   // Are they ready or not
   private boolean isPlayerReady = false;
   private boolean isOpponentReady = false;
 
   // Class data
   private JLabel roomIDLabel;
+  private JLabel ownerIDLabel;
   private JLabel playerIDLabel;
   private JLabel opponentIDLabel;
   private JButton roomReadyOrCancelButton;
@@ -51,6 +55,17 @@ public class RoomFrame extends JFrame {
   // <Room ID: ...>
   public void setRoomID(String roomID) {
     roomIDLabel.setText("Room ID: " + roomID);
+  }
+
+  // <Owner ID: ...>
+  public void setOwnerID(String ownerID) {
+    this.ownerID = ownerID;
+    ownerIDLabel.setText("Owner: " + ownerID);
+  }
+
+  // If the room owner is empty
+  public boolean isOwnerEmpty() {
+    return this.ownerID.equals("");
   }
 
   // <Player ID (ready or not)>
@@ -131,6 +146,13 @@ public class RoomFrame extends JFrame {
     roomIDLabel.setFont(new Font("Georgia", Font.PLAIN, 12));
     roomIDLabel.setBounds(50, 108, 300, 30);
     contentPane.add(roomIDLabel);
+
+    // <Owner ID: ...>
+    ownerIDLabel = new JLabel("Owner: ");
+    ownerIDLabel.setHorizontalAlignment(SwingConstants.CENTER);
+    ownerIDLabel.setFont(new Font("Georgia", Font.PLAIN, 12));
+    ownerIDLabel.setBounds(50, 122, 300, 30);
+    contentPane.add(ownerIDLabel);
 
     // <Player ID (ready or not)>
     playerIDLabel = new JLabel("playerID");

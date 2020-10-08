@@ -22,6 +22,7 @@ public class Room {
 
   public String id;
   public RoomState state;
+  // Players; {first joined(owner), last joined}
   public LinkedList<Player> players;
   public Gomoku game;
 
