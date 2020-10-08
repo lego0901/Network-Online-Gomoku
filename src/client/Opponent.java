@@ -42,6 +42,7 @@ public class Opponent {
       // If the opponent leaves
       state = State.NONE;
       inputState = InputState.NONE;
+      Client.roomFrame.setOwnerID(Player.id);
     }
 
     switch (state) {
@@ -61,6 +62,8 @@ public class Opponent {
             id = response;
             state = State.ENTER_ROOM;
             inputState = InputState.IN_ROOM;
+            if (Client.roomFrame.isOwnerEmpty())
+              Client.roomFrame.setOwnerID(id);
             break;
           default:
             // invalid response
