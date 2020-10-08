@@ -32,7 +32,7 @@
 
 각 방에서 플레이어는 준비(ready)를 하거나 취소할 수 있다. 모든 플레이어는 같은
 방에 있는 다른 플레이어의 준비 상태를 실시간으로 확인할 수 있다. 꽉찬 방의 두
-플레이어가 모두 준비를 하면 오목 게임을 시작한다. 처음 방에 들어온 플레이어가
+플레이어가 모두 준비를 하면 오목 게임을 시작한다. 처음 방에 들어온 플레이어가 owner로서
 선수(흑돌)를 잡으며, 나중에 들어온 플레이어가 후수(백돌)를 잡는다.
 
 게임 화면에서 11x11 크기의 오목판이 주어진다. 각 플레이어는 자신의 차례에
@@ -79,13 +79,13 @@ $ java -jar client.jar
   \centering
   \begin{subfigure}{.3\textwidth}
     \centering
-    \includegraphics[width=.9\linewidth]{resource/login}
+    \includegraphics[width=.8\linewidth]{resource/login}
     \caption{플레이어 ID 입력 화면}
     \label{fig:login}
   \end{subfigure}
   \begin{subfigure}{.3\textwidth}
     \centering
-    \includegraphics[width=.9\linewidth]{resource/room_search}
+    \includegraphics[width=.8\linewidth]{resource/room_search}
     \caption{게임 방을 고르는 화면}
     \label{fig:room_search}
   \end{subfigure}
@@ -94,9 +94,9 @@ $ java -jar client.jar
 
 플레이어 ID를 성공적으로 생성하고나면 접속할 방을 고르는 화면이 나온다.
 Refresh 버튼을 누르면 방 리스트를 다시 서버에서 받아온다. 이 버튼을 누르지
-않더라도 방 정보가 바뀐 것이 있다면 자동으로 새로고침한다. (wait) 접두어로
+않아도 방 정보가 바뀐 것이 있다면 자동으로 새로고침한다. (wait) 접두어로
 된 방은 한 명의 플레이어만 접속하고 있는 곳으로, 접속이 가능하다. (full)
-접두어는 두 명의 플레이어가 있는 방으로 접속이 불가능하다. 리스트 안의
+접두어는 두 명의 플레이어가 있는 방으로 접속 불가능하다. 리스트 안의
 방 라벨을 누르면 아래 텍스트 필드에 해당 방의 이름이 채워진다. 텍스트 필드를
 채운 뒤 Join 버튼을 누르면 해당 방에 접속 시도를 할 수 있다. 새로운 방을
 만들고자하면 텍스트 필드에 2글자 이상, 20글자 이하 영문 방 이름을 넣고
@@ -105,19 +105,20 @@ Create 버튼을 누르면 생성할 수 있다. 물론 중복은 허용하지 �
 방에 접속하고 나면 아래와 같은 화면이 보인다. 상대 플레이어가 아직 들어오지
 않는다면 (Waiting) 라벨이 보인다. 상대 플레이어가 들어오면 그 ID가 보인다.
 Ready 버튼을 통해 준비할 수 있고, Cancel 버튼으로 준비를 취소할 수 있다.
+먼저 들어온 플레이어인 Owner란이 상단에 보이며, 게임 시작 시 선수가 된다.
 Leave 버튼을 누르면 방을 나가서 다시 Figure \ref{fig:room_search} 화면으로
 돌아간다. 두 플레이어가 모두 준비 상태이면 게임이 시작된다.
 \begin{figure}[h]
   \centering
   \begin{subfigure}{.3\textwidth}
     \centering
-    \includegraphics[width=.9\linewidth]{resource/waiting}
+    \includegraphics[width=.8\linewidth]{resource/waiting}
     \caption{상대 플레이어가 없을 때}
     \label{fig:waiting}
   \end{subfigure}
   \begin{subfigure}{.3\textwidth}
     \centering
-    \includegraphics[width=.9\linewidth]{resource/room}
+    \includegraphics[width=.8\linewidth]{resource/room}
     \caption{상대방이 들어와서 준비를 함}
     \label{fig:room}
   \end{subfigure}
@@ -134,19 +135,19 @@ Leave 버튼을 누르면 방을 나가서 다시 Figure \ref{fig:room_search} �
   \centering
   \begin{subfigure}{.3\textwidth}
     \centering
-    \includegraphics[width=.9\linewidth]{resource/game}
+    \includegraphics[width=.8\linewidth]{resource/game}
     \caption{누구 차례, 어느 색깔인지 안내}
     \label{fig:waiting}
   \end{subfigure}
   \begin{subfigure}{.3\textwidth}
     \centering
-    \includegraphics[width=.9\linewidth]{resource/out_of_board}
+    \includegraphics[width=.8\linewidth]{resource/out_of_board}
     \caption{허용되지 않는 동작 경고 문구}
     \label{fig:room}
   \end{subfigure}
   \begin{subfigure}{.3\textwidth}
     \centering
-    \includegraphics[width=.9\linewidth]{resource/win}
+    \includegraphics[width=.8\linewidth]{resource/win}
     \caption{흑돌 승리!}
     \label{fig:room}
   \end{subfigure}
@@ -505,6 +506,8 @@ src
   \item \texttt{RoomFrame.java}
   \begin{itemize}
     \item[] 게임 대기 방을 보여주는 화면이다. 상대방의 ID와 준비 상태를 실시간으로 확인할 수 있다.
+    \item \texttt{void setOwnerID(String ownerID)}: 주인 ID 라벨을 채운다.
+    \item \texttt{boolean isOwnerEmpty()}: 지금 주인이 있는지 없는지 확인한다.
     \item \texttt{void setPlayerID(String playerID)}: 플레이어 ID 라벨을 채운다.
     \item \texttt{void setPlayerReadyOrCancel(boolean ready)}: 준비 상태를 바꾼다. Ready 버튼이 Cancel로 바뀌거나 돌아오고,
     준비된 플레이어는 굵은 글씨로 표시된다.
@@ -652,19 +655,19 @@ src
   \centering
   \begin{subfigure}{.3\textwidth}
     \centering
-    \includegraphics[width=.9\linewidth]{resource/login}
+    \includegraphics[width=.8\linewidth]{resource/login}
     \caption{플레이어 로그인}
     \label{fig:login}
   \end{subfigure}
   \begin{subfigure}{.3\textwidth}
     \centering
-    \includegraphics[width=.9\linewidth]{resource/room_search}
+    \includegraphics[width=.8\linewidth]{resource/room_search}
     \caption{방 검색 화면}
     \label{fig:room_search}
   \end{subfigure}
   \begin{subfigure}{.3\textwidth}
     \centering
-    \includegraphics[width=.9\linewidth]{resource/waiting}
+    \includegraphics[width=.8\linewidth]{resource/waiting}
     \caption{방 생성 및 접속 직후}
     \label{fig:draw}
   \end{subfigure}
@@ -676,19 +679,19 @@ src
   \centering
   \begin{subfigure}{.3\textwidth}
     \centering
-    \includegraphics[width=.9\linewidth]{resource/room}
+    \includegraphics[width=.8\linewidth]{resource/room}
     \caption{실시간 준비 및 취소}
     \label{fig:ready}
   \end{subfigure}
   \begin{subfigure}{.3\textwidth}
     \centering
-    \includegraphics[width=.9\linewidth]{resource/win}
+    \includegraphics[width=.8\linewidth]{resource/win}
     \caption{오목 승리}
     \label{fig:win}
   \end{subfigure}
   \begin{subfigure}{.3\textwidth}
     \centering
-    \includegraphics[width=.9\linewidth]{resource/draw}
+    \includegraphics[width=.8\linewidth]{resource/draw}
     \caption{50수 무승부}
     \label{fig:draw}
   \end{subfigure}
@@ -733,13 +736,13 @@ src
   \centering
   \begin{subfigure}{.3\textwidth}
     \centering
-    \includegraphics[width=.9\linewidth]{resource/out_of_board}
+    \includegraphics[width=.8\linewidth]{resource/out_of_board}
     \caption{돌 보드 밖 배치}
     \label{fig:out_of_board}
   \end{subfigure}
   \begin{subfigure}{.3\textwidth}
     \centering
-    \includegraphics[width=.9\linewidth]{resource/already_stone}
+    \includegraphics[width=.8\linewidth]{resource/already_stone}
     \caption{돌 중복 배치}
     \label{fig:draw}
   \end{subfigure}
